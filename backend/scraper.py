@@ -31,7 +31,10 @@ def main():
     # Loop through each nation
     for nation_name, nation_id in NATIONS.items():
         print(f"--- Processing Nation: {nation_name} (ID: {nation_id}) ---")
-        nation_events = scrape_event_data(nation_id, nation_name)
+        nation_events = scrape_event_data(nation_id)
+        
+        print("NATION EVENTS:")
+        print(nation_events)
 
         for event in nation_events:
             
@@ -54,9 +57,12 @@ def main():
 def get_event_data(nation_id):
     URL = f"https://api.studentkortet.se/organization/{nation_id}/organization-events"
     response = requests.get(URL)
-    if response.status_code != 200:
-        print(f"Failed to fetch data for nation ID {nation_id}")
-        return None
+    print("RESPONSE CODE:")
+    print(response.status_code)
+    if response.status_code == 200:
+        return response.json()
+    print(f"Failed to fetch data for nation ID {nation_id}")
+    return None
 
 # Function to get the response from the bouncer link
 def get_bouncer_response(bouncer_link):
@@ -67,33 +73,35 @@ def get_bouncer_response(bouncer_link):
 
 
 def scrape_event_data(nation_id):
-    formatted_events = []
+    events = []
         
-    raw_event_data = get_event_data(nation_id)
+    event_data = get_event_data(nation_id)
     
-    for event_info in raw_event_data:
-        event_title = event_info.get("title")
-        event_description = event_info.get("content")
+    for event in event_data:
+        event_title = event.get("title")
+        event_description = event.get("content")
+        
+        print("EVENT TITLE:")
+        print(event_title)
 
-        occurrences = event_info.get("organization_event_occurrences", []) 
+        occurrences = event.get("organization_event_occurrences", []) 
 
-        for occurrence in occurrences:
-                      
+        for occurrence in occurrences: 
 
-            formatted_tickets = []
+            tickets = []
 
-            raw_tickets = occurrence.get("tickets", [])
+            ticket_data = occurrence.get("tickets", [])
 
-            for ticket_info in raw_tickets:
+            for ticket in ticket_data:
                 formatted_ticket = {
-                "name": ticket_info.get("name"),
-                "ticket_count": ticket_info.get("count"),
-                "price": ticket_info.get("price"),
-                "activite": ticket_info.get("is_active"),
-                "max_count_per_person": ticket_info.get("max_count_per_member")
+                "name": ticket.get("name"),
+                "ticket_count": ticket.get("count"),
+                "price": ticket.get("price"),
+                "activite": ticket.get("is_active"),
+                "max_count_per_person": ticket.get("max_count_per_member")
                 }
 
-                formatted_tickets.append(formatted_ticket)
+                tickets.append(formatted_ticket)
 
 
             bouncer = occurrence.get("bouncer")
@@ -108,21 +116,19 @@ def scrape_event_data(nation_id):
 
 
             event_occurrence_data = {
-            "occurrence_id": occurrence.get("id"),
-            "event_id": occurrence.get("organization_event_id"),
-            "start_date": occurrence.get("start_date"),
-            "end_date": occurrence.get("end_date"),
-            "address": occurrence.get("address"),
-            
-            
-
+                "occurrence_id": occurrence.get("id"),
+                "event_id": occurrence.get("organization_event_id"),
+                "start_date": occurrence.get("start_date"),
+                "end_date": occurrence.get("end_date"),
+                "address": occurrence.get("address"),
             }
+            
             if bounce_url:
                 event_occurrence_data["link"] = bounce_url
 
-            formatted_events.append(event_occurrence_data)
+            events.append(event_occurrence_data)
 
-    return formatted_events
+    return events
 
 
 
@@ -225,7 +231,7 @@ def add_event_to_database(event_details):
 
     except Exception as e:
         # Print error message
-        print(f"Error inserting event '{event_details['name']}': {e}")
+        print(f"Error inserting event {e}")
         
         # If an error occurs, rollback the transaction
         if conn:
