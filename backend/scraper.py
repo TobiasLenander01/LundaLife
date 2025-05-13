@@ -1,39 +1,74 @@
+from dotenv import load_dotenv
+import os
+import psycopg2
+import datetime
 
-# Define the list of nations with their respective IDs
+# Load environment variables from .env
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Nation names mapped to existing nation IDs in the database
 NATIONS = {
-    "Malmö": 2698,
-    "Göteborg": 1234,
-    "Blekingska": 2635,
-    "Östgöta": 2711,
+    "Malmös": 2698,
+    "Göteborgs": 2653,
+    "Blekingskas": 2635,
+    "Östgötas": 2711,
+    "Lunds": 2689,
+    "Västgötas": 2710,
+    "Wermlands": 2709,
+    "Sydskånskas": 2708,
+    "Kristianstads": 2680,
+    "Kalmars": 2672,
+    "Helsingkronas": 2662,
+    "Hallands": 2644,
+    "Smålands": 2754
 }
 
-
-# Define the main function
 def main():
-    for nation, id in NATIONS.items():
-        # Scrape data
-        data = scrape_nation_data(nation, id)
-        
-        # Add data into database
-        add_data_to_database(data)
+    for nation, nation_id in NATIONS.items():
+        event_data = scrape_nation_data(nation, nation_id)
+        add_event_to_database(event_data)
 
+def scrape_nation_data(nation, nation_id):
+    # Simulated event data
+    return {
+        "name": f"{nation} Annual Party",
+        "description": f"A wonderful evening at {nation}.",
+        "nation_id": nation_id,
+        "ticket_id": None,  # No ticket assigned (optional)
+        "link": f"https://{nation.lower()}.se/event",
+        "start_date": datetime.datetime.now(),
+        "end_date": datetime.datetime.now() + datetime.timedelta(hours=4)
+    }
 
+def add_event_to_database(event):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
 
-# Define the scraping function
-def scrape_nation_data(nation, id):
-    return id
-    # Placeholder function to simulate data scraping
+        insert_query = """
+        INSERT INTO events (name, description, nation_id, ticket_id, link, start_date, end_date)
+        VALUES (%s, %s, %s, %s, %s, %s, %s);
+        """
+        cursor.execute(insert_query, (
+            event["name"],
+            event["description"],
+            event["nation_id"],
+            event["ticket_id"],
+            event["link"],
+            event["start_date"],
+            event["end_date"]
+        ))
 
+        conn.commit()
+        print(f"Inserted event: {event['name']}")
 
-# Define the function to add data to the database
-def add_data_to_database(data):
-    # Placeholder function to simulate adding data to a database
-    print(f"Adding data to database: {data}")
+        cursor.close()
+        conn.close()
 
+    except Exception as e:
+        print(f"Error inserting event: {e}")
 
-
-
-
-# Run the main function
 if __name__ == "__main__":
     main()
