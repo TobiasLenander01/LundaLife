@@ -45,7 +45,6 @@ def main():
                 # Add associated tickets to the database
                 for ticket_details in event.get("tickets", []): # Use .get for safety
                     add_ticket_to_database(db_event_id, ticket_details)
-                    total_tickets_added_to_db += 1
                     
                     
             else:
@@ -142,6 +141,7 @@ def add_ticket_to_database(db_event_id, ticket_info):
     """
     Adds a ticket to the database for a given event.
     """
+    global total_tickets_added_to_db
     
     # Reset variables
     conn = None
@@ -196,6 +196,7 @@ def add_event_to_database(event_details):
     Adds an event to the database and returns its auto-generated primary key (id).
     Returns None if insertion fails.
     """
+    global total_events_added_to_db
     
     # Reset variables
     conn = None
