@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from bs4 import BeautifulSoup
 import os
 import psycopg2
 import datetime
@@ -116,7 +117,7 @@ def scrape_event_data(nation_id):
                 "address": occurrence.get("address"),
                 "nation_id": nation_id,
                 "name": event_title,
-                "description": event_description,
+                "description": BeautifulSoup(event_description, "html.parser").get_text(),
                 "tickets": tickets
             }
             
