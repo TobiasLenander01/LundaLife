@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import psycopg2
 import datetime
+import requests
 
 # Load environment variables from .env
 load_dotenv()
@@ -50,63 +51,79 @@ def main():
 
 
 
+def get_event_data(nation_id):
+    URL = f"https://api.studentkortet.se/organization/{nation_id}/organization-events"
+    response = requests.get(URL)
+    if response.status_code != 200:
+        print(f"Failed to fetch data for nation ID {nation_id}")
+        return None
+
+# Function to get the response from the bouncer link
+def get_bouncer_response(bouncer_link):
+    response = requests.get(bouncer_link)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+
 def scrape_event_data(nation_id):
-    return [
-        {
-            "event_id": 1000,  # Custom external ID, not the primary key
-            "occurrence_id": 1,
-            "nation_id": nation_id, # Use the actual nation_id passed
-            "name": f"Förköp Event 1",
-            "description": f"Sample description for event 1.",
-            "link": f"http://example.com/event1",
-            "start_date": datetime.datetime.now(datetime.timezone.utc),
-            "end_date": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=4),
-            "tickets": [
-                {
-                    # "ticket_id" is not needed here, DB generates "id"
-                    "name": "Förköp",
-                    "price": 150.00,
-                    "active": True,
-                    "count": 100,
-                    "max_count_per_person": 5
-                },
-                {
-                    "name": "Förman VIP",
-                    "price": 120.00,
-                    "active": True,
-                    "count": 50,
-                    "max_count_per_person": 2
+    formatted_events = []
+        
+    raw_event_data = get_event_data(nation_id)
+    
+    for event_info in raw_event_data:
+        event_title = event_info.get("title")
+        event_description = event_info.get("content")
+
+        occurrences = event_info.get("organization_event_occurrences", []) 
+
+        for occurrence in occurrences:
+                      
+
+            formatted_tickets = []
+
+            raw_tickets = occurrence.get("tickets", [])
+
+            for ticket_info in raw_tickets:
+                formatted_ticket = {
+                "name": ticket_info.get("name"),
+                "ticket_count": ticket_info.get("count"),
+                "price": ticket_info.get("price"),
+                "activite": ticket_info.get("is_active"),
+                "max_count_per_person": ticket_info.get("max_count_per_member")
                 }
-            ]
-        },
-        {
-            "event_id": 1001,
-            "occurrence_id": 1,
-            "nation_id": nation_id,
-            "name": f"Sittning Event 2",
-            "description": f"Another event for.",
-            "link": f"http://example.com/event2",
-            "start_date": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7),
-            "end_date": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7, hours=5),
-            "tickets": [
-                {
-                    # "ticket_id" is not needed here, DB generates "id"
-                    "name": "Förköp",
-                    "price": 150.00,
-                    "active": True,
-                    "count": 100,
-                    "max_count_per_person": 5
-                },
-                {
-                    "name": "Förman VIP",
-                    "price": 120.00,
-                    "active": True,
-                    "count": 50,
-                    "max_count_per_person": 2
-                }
-            ]
-        }
-    ]
+
+                formatted_tickets.append(formatted_ticket)
+
+
+            bouncer = occurrence.get("bouncer")
+            if bouncer:
+                bouncer_link = bouncer.get("bouncer_link")
+                if bouncer_link:
+                    # Get the bouncer response
+                    bouncer_response = get_bouncer_response(bouncer_link)
+                    if bouncer_response:
+                        # Print and send the desired URL from the bouncer response to Telegram
+                        bounce_url = bouncer_response.get("bounce")
+
+
+            event_occurrence_data = {
+            "occurrence_id": occurrence.get("id"),
+            "event_id": occurrence.get("organization_event_id"),
+            "start_date": occurrence.get("start_date"),
+            "end_date": occurrence.get("end_date"),
+            "address": occurrence.get("address"),
+            
+            
+
+            }
+            if bounce_url:
+                event_occurrence_data["link"] = bounce_url
+
+            formatted_events.append(event_occurrence_data)
+
+    return formatted_events
+
 
 
 def add_ticket_to_database(db_event_id, ticket_info):
