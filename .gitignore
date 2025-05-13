@@ -37,3 +37,76 @@ frontend/.vercel
 # TypeScript
 /frontend/*.tsbuildinfo
 /frontend/next-env.d.ts
+
+
+#### Backend ####
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments inside backend/
+backend/venv/
+backend/.venv/
+backend/env/
+backend/ENV/
+
+# Jupyter Notebook checkpoints
+**/.ipynb_checkpoints
+
+# VS Code and PyCharm
+.vscode/
+.idea/
+
+# macOS & Windows system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Build / dist / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Coverage & testing
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+.nox/
+.pytest_cache/
+.junit.xml
+
+# Type checker caches
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Pylint
+.pylint.d/
+
+# Environment files
+.env
+.env.*
+
+# SQLite or local DBs
+*.sqlite3
+
+# Logs
+*.log
