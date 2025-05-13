@@ -27,17 +27,25 @@ NATIONS = {
 
 def main():
     for nation, nation_id in NATIONS.items():
-        event_data = scrape_nation_data(nation, nation_id)
+        event_data = scrape_event_data(nation_id)
         add_event_to_database(event_data)
 
-def scrape_nation_data(nation, nation_id):
+
+def scrape_event_data(nation_id):
+    URL = f"https://api.studentkortet.se/organization/{id}/organization-events"
     # Simulated event data
+    # Loop through the NATIONS dictionary to get nation IDs
+    for nation in NATIONS:
+        
+
+
+
     return {
-        "name": f"{nation} Annual Party",
-        "description": f"A wonderful evening at {nation}.",
+        "name": "Sample Event",
+        "description": "This is a sample event description.",
         "nation_id": nation_id,
         "ticket_id": None,  # No ticket assigned (optional)
-        "link": f"https://{nation.lower()}.se/event",
+        "link": "https://example.com/event",
         "start_date": datetime.datetime.now(),
         "end_date": datetime.datetime.now() + datetime.timedelta(hours=4)
     }
