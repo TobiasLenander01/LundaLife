@@ -50,15 +50,15 @@ def main():
 
 
 
-def scrape_event_data(nation_id, nation_name):
+def scrape_event_data(nation_id):
     return [
         {
             "event_id": 1000,  # Custom external ID, not the primary key
             "occurrence_id": 1,
             "nation_id": nation_id, # Use the actual nation_id passed
-            "name": f"Förköp {nation_name} Event 1",
-            "description": f"Sample description for {nation_name} event 1.",
-            "link": f"http://example.com/{nation_name.lower()}/event1",
+            "name": f"Förköp Event 1",
+            "description": f"Sample description for event 1.",
+            "link": f"http://example.com/event1",
             "start_date": datetime.datetime.now(datetime.timezone.utc),
             "end_date": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=4),
             "tickets": [
@@ -83,9 +83,9 @@ def scrape_event_data(nation_id, nation_name):
             "event_id": 1001,
             "occurrence_id": 1,
             "nation_id": nation_id,
-            "name": f"Sittning {nation_name} Event 2",
-            "description": f"Another event for {nation_name}.",
-            "link": f"http://example.com/{nation_name.lower()}/event2",
+            "name": f"Sittning Event 2",
+            "description": f"Another event for.",
+            "link": f"http://example.com/event2",
             "start_date": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7),
             "end_date": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7, hours=5),
             "tickets": [
