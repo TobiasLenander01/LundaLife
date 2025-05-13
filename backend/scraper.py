@@ -27,26 +27,29 @@ NATIONS = {
     "Östgötas": 2711
 }
 
+total_events_added_to_db = 0
+total_tickets_added_to_db = 0
+
 def main():
 
-    nation_events = scrape_event_data(NATIONS["Kristianstads"]) # Test with a single nation ID
-    print ("SCRAPED EVENTS:")
-    print(nation_events)
-    print("ADDING EVENTS TO DATABASE")
-    for event in nation_events:
+    for nation_name, nation_id in NATIONS.items():
+        nation_events = scrape_event_data(nation_id) # Test with a single nation ID
         
-        db_event_id = add_event_to_database(event)
+        print("ADDING EVENTS TO DATABASE")
+        for event in nation_events:
+            
+            db_event_id = add_event_to_database(event)
 
-        if db_event_id: # If event insertion was successful
-            
-            
-            # Add associated tickets to the database
-            for ticket_details in event.get("tickets", []): # Use .get for safety
-                add_ticket_to_database(db_event_id, ticket_details)
+            if db_event_id: # If event insertion was successful
                 
-                
-        else:
-            print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
+                # Add associated tickets to the database
+                for ticket_details in event.get("tickets", []): # Use .get for safety
+                    add_ticket_to_database(db_event_id, ticket_details)
+                    total_tickets_added_to_db += 1
+                    
+                    
+            else:
+                print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
 
 
 
@@ -81,7 +84,7 @@ def scrape_event_data(nation_id):
     for event in nation_event_data:
         event_title = event.get("title")
         event_description = event.get("content")
-        print(event_title)
+        print("Analyzing: " + event_title)
 
         occurrences = event.get("organization_event_occurrences", [])
 
@@ -92,6 +95,7 @@ def scrape_event_data(nation_id):
             ticket_data = occurrence.get("tickets", [])
 
             if ticket_data:
+                print("Tickets found for event: " + event_title)
                 for ticket in ticket_data:
                     formatted_ticket = {
                         "name": ticket.get("name"),
@@ -102,16 +106,8 @@ def scrape_event_data(nation_id):
                     }
 
                     tickets.append(formatted_ticket)
-
-            bouncer = occurrence.get("bouncer")
-            if bouncer:
-                bouncer_link = bouncer.get("bouncer_link")
-                if bouncer_link:
-                    # Get the bouncer response
-                    bouncer_response = get_bouncer_response(bouncer_link)
-                    if bouncer_response:
-                        # Print and send the desired URL from the bouncer response to Telegram
-                        bounce_url = bouncer_response.get("bounce")
+            else:
+                print("No tickets found for event: " + event_title)
 
             formatted_event = {
                 "occurrence_id": occurrence.get("id"),
@@ -125,11 +121,19 @@ def scrape_event_data(nation_id):
                 "tickets": tickets
             }
             
-            if bounce_url:
-                formatted_event["link"] = bounce_url
-
+            # Get the current date and time
+            current_datetime = datetime.datetime.now()
+            event_start_datetime = datetime.datetime.strptime(occurrence.get("start_date"), "%Y-%m-%dT%H:%M:%S.%fZ")
+            
+            # Check if the event has already happened
+            if event_start_datetime < current_datetime:
+                print(f"Skipping {event_title}, has already happened.")
+                continue
+            
+            print("Adding event to list: " + event_title)
             events.append(formatted_event)
 
+    print(f"Adding NATION {nation_id} events to the database")
     return events
 
 
@@ -169,6 +173,9 @@ def add_ticket_to_database(db_event_id, ticket_info):
         
         # Print info about the inserted ticket
         print(f"Inserted ticket: '{ticket_info.get('name')}' for event ID {db_event_id}")
+        
+        # Increment the global counter for tickets added to the database
+        total_tickets_added_to_db += 1
 
     except Exception as e:
         # Print error message
@@ -202,8 +209,8 @@ def add_event_to_database(event_details):
 
         # Define the SQL query to insert an event
         insert_query = """
-        INSERT INTO events (event_id, occurrence_id, nation_id, name, description, link, start_date, end_date)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO events (event_id, occurrence_id, nation_id, name, description, start_date, end_date)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         RETURNING id;
         """
         
@@ -214,7 +221,6 @@ def add_event_to_database(event_details):
             event_details["nation_id"],
             event_details["name"],
             event_details["description"],
-            event_details["link"],
             event_details["start_date"],
             event_details["end_date"]
         ))
@@ -227,6 +233,9 @@ def add_event_to_database(event_details):
         
         # Print info about the inserted event
         print(f"Inserted event: '{event_details['name']}' with DB ID: {db_event_id}")
+        
+        # Increment the global counter for events added to the database
+        total_events_added_to_db += 1
         
         # Return the auto-generated primary key (id)
         return db_event_id
@@ -254,3 +263,5 @@ if __name__ == "__main__":
     print("Starting the script...")
     main()
     print("Script finished.")
+    print(f"Total events added to DB: {total_events_added_to_db}")
+    print(f"Total tickets added to DB: {total_tickets_added_to_db}")
