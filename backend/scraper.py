@@ -28,25 +28,25 @@ NATIONS = {
 }
 
 def main():
-    # Loop through each nation
-    for nation_name, nation_id in NATIONS.items():
-        print(f"--- Processing Nation: {nation_name} (ID: {nation_id}) ---")
-        nation_events = scrape_event_data(nation_id, nation_name)
 
-        for event in nation_events:
+    nation_events = scrape_event_data(NATIONS["Kristianstads"]) # Test with a single nation ID
+    print ("SCRAPED EVENTS:")
+    print(nation_events)
+    print("ADDING EVENTS TO DATABASE")
+    for event in nation_events:
+        
+        db_event_id = add_event_to_database(event)
+
+        if db_event_id: # If event insertion was successful
             
-            db_event_id = add_event_to_database(event)
-
-            if db_event_id: # If event insertion was successful
+            
+            # Add associated tickets to the database
+            for ticket_details in event.get("tickets", []): # Use .get for safety
+                add_ticket_to_database(db_event_id, ticket_details)
                 
                 
-                # Add associated tickets to the database
-                for ticket_details in event.get("tickets", []): # Use .get for safety
-                    add_ticket_to_database(db_event_id, ticket_details)
-                    
-                    
-            else:
-                print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
+        else:
+            print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
 
 
 
@@ -54,9 +54,12 @@ def main():
 def get_event_data(nation_id):
     URL = f"https://api.studentkortet.se/organization/{nation_id}/organization-events"
     response = requests.get(URL)
-    if response.status_code != 200:
-        print(f"Failed to fetch data for nation ID {nation_id}")
-        return None
+    print("RESPONSE CODE:")
+    print(response.status_code)
+    if response.status_code == 200:
+        return response.json()
+    print(f"Failed to fetch data for nation ID {nation_id}")
+    return None
 
 # Function to get the response from the bouncer link
 def get_bouncer_response(bouncer_link):
@@ -67,34 +70,38 @@ def get_bouncer_response(bouncer_link):
 
 
 def scrape_event_data(nation_id):
-    formatted_events = []
-        
-    raw_event_data = get_event_data(nation_id)
-    
-    for event_info in raw_event_data:
-        event_title = event_info.get("title")
-        event_description = event_info.get("content")
+    events = []
+    nation_event_data = get_event_data(nation_id)
 
-        occurrences = event_info.get("organization_event_occurrences", []) 
+    if nation_event_data is None:
+        print(f"No event data found for nation_id {nation_id}. Skipping.")
+        return []
+
+   
+    for event in nation_event_data:
+        event_title = event.get("title")
+        event_description = event.get("content")
+        print(event_title)
+
+        occurrences = event.get("organization_event_occurrences", [])
 
         for occurrence in occurrences:
-                      
+                               
+            tickets = []
 
-            formatted_tickets = []
+            ticket_data = occurrence.get("tickets", [])
 
-            raw_tickets = occurrence.get("tickets", [])
+            if ticket_data:
+                for ticket in ticket_data:
+                    formatted_ticket = {
+                        "name": ticket.get("name"),
+                        "ticket_count": ticket.get("count"),
+                        "price": ticket.get("price"),
+                        "active": ticket.get("is_active"),
+                        "max_count_per_person": ticket.get("max_count_per_member")
+                    }
 
-            for ticket_info in raw_tickets:
-                formatted_ticket = {
-                "name": ticket_info.get("name"),
-                "ticket_count": ticket_info.get("count"),
-                "price": ticket_info.get("price"),
-                "activite": ticket_info.get("is_active"),
-                "max_count_per_person": ticket_info.get("max_count_per_member")
-                }
-
-                formatted_tickets.append(formatted_ticket)
-
+                    tickets.append(formatted_ticket)
 
             bouncer = occurrence.get("bouncer")
             if bouncer:
@@ -106,23 +113,24 @@ def scrape_event_data(nation_id):
                         # Print and send the desired URL from the bouncer response to Telegram
                         bounce_url = bouncer_response.get("bounce")
 
-
-            event_occurrence_data = {
-            "occurrence_id": occurrence.get("id"),
-            "event_id": occurrence.get("organization_event_id"),
-            "start_date": occurrence.get("start_date"),
-            "end_date": occurrence.get("end_date"),
-            "address": occurrence.get("address"),
-            
-            
-
+            formatted_event = {
+                "occurrence_id": occurrence.get("id"),
+                "event_id": occurrence.get("organization_event_id"),
+                "start_date": occurrence.get("start_date"),
+                "end_date": occurrence.get("end_date"),
+                "address": occurrence.get("address"),
+                "nation_id": nation_id,
+                "name": event_title,
+                "description": event_description,
+                "tickets": tickets
             }
+            
             if bounce_url:
-                event_occurrence_data["link"] = bounce_url
+                formatted_event["link"] = bounce_url
 
-            formatted_events.append(event_occurrence_data)
+            events.append(formatted_event)
 
-    return formatted_events
+    return events
 
 
 
@@ -225,7 +233,7 @@ def add_event_to_database(event_details):
 
     except Exception as e:
         # Print error message
-        print(f"Error inserting event '{event_details['name']}': {e}")
+        print(f"Error inserting event {e}")
         
         # If an error occurs, rollback the transaction
         if conn:
