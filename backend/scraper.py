@@ -28,28 +28,25 @@ NATIONS = {
 }
 
 def main():
-    # Loop through each nation
-    for nation_name, nation_id in NATIONS.items():
-        print(f"--- Processing Nation: {nation_name} (ID: {nation_id}) ---")
-        nation_events = scrape_event_data(nation_id)
+
+    nation_events = scrape_event_data(NATIONS["Kristianstads"]) # Test with a single nation ID
+    print ("SCRAPED EVENTS:")
+    print(nation_events)
+    print("ADDING EVENTS TO DATABASE")
+    for event in nation_events:
         
-        print("NATION EVENTS:")
-        print(nation_events)
+        db_event_id = add_event_to_database(event)
 
-        for event in nation_events:
+        if db_event_id: # If event insertion was successful
             
-            db_event_id = add_event_to_database(event)
-
-            if db_event_id: # If event insertion was successful
+            
+            # Add associated tickets to the database
+            for ticket_details in event.get("tickets", []): # Use .get for safety
+                add_ticket_to_database(db_event_id, ticket_details)
                 
                 
-                # Add associated tickets to the database
-                for ticket_details in event.get("tickets", []): # Use .get for safety
-                    add_ticket_to_database(db_event_id, ticket_details)
-                    
-                    
-            else:
-                print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
+        else:
+            print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
 
 
 
@@ -74,35 +71,37 @@ def get_bouncer_response(bouncer_link):
 
 def scrape_event_data(nation_id):
     events = []
-        
-    event_data = get_event_data(nation_id)
-    
-    for event in event_data:
+    nation_event_data = get_event_data(nation_id)
+
+    if nation_event_data is None:
+        print(f"No event data found for nation_id {nation_id}. Skipping.")
+        return []
+
+   
+    for event in nation_event_data:
         event_title = event.get("title")
         event_description = event.get("content")
-        
-        print("EVENT TITLE:")
         print(event_title)
 
-        occurrences = event.get("organization_event_occurrences", []) 
+        occurrences = event.get("organization_event_occurrences", [])
 
-        for occurrence in occurrences: 
-
+        for occurrence in occurrences:
+                               
             tickets = []
 
             ticket_data = occurrence.get("tickets", [])
 
-            for ticket in ticket_data:
-                formatted_ticket = {
-                "name": ticket.get("name"),
-                "ticket_count": ticket.get("count"),
-                "price": ticket.get("price"),
-                "activite": ticket.get("is_active"),
-                "max_count_per_person": ticket.get("max_count_per_member")
-                }
+            if ticket_data:
+                for ticket in ticket_data:
+                    formatted_ticket = {
+                        "name": ticket.get("name"),
+                        "ticket_count": ticket.get("count"),
+                        "price": ticket.get("price"),
+                        "active": ticket.get("is_active"),
+                        "max_count_per_person": ticket.get("max_count_per_member")
+                    }
 
-                tickets.append(formatted_ticket)
-
+                    tickets.append(formatted_ticket)
 
             bouncer = occurrence.get("bouncer")
             if bouncer:
@@ -114,19 +113,22 @@ def scrape_event_data(nation_id):
                         # Print and send the desired URL from the bouncer response to Telegram
                         bounce_url = bouncer_response.get("bounce")
 
-
-            event_occurrence_data = {
+            formatted_event = {
                 "occurrence_id": occurrence.get("id"),
                 "event_id": occurrence.get("organization_event_id"),
                 "start_date": occurrence.get("start_date"),
                 "end_date": occurrence.get("end_date"),
                 "address": occurrence.get("address"),
+                "nation_id": nation_id,
+                "name": event_title,
+                "description": event_description,
+                "tickets": tickets
             }
             
             if bounce_url:
-                event_occurrence_data["link"] = bounce_url
+                formatted_event["link"] = bounce_url
 
-            events.append(event_occurrence_data)
+            events.append(formatted_event)
 
     return events
 
