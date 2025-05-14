@@ -1,17 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-type Event = {
-    id: number;
-    name: string;
-    description: string | null;
-    link: string | null;
-    start_date: string;
-    end_date: string | null;
-    nation_name: string;
-    nation_address: string;
-};
+import { Event } from '@/types/db';
 
 export default function EventsPage() {
     const [events, setEvents] = useState<Event[]>([]);
