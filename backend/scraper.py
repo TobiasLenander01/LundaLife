@@ -195,7 +195,7 @@ def add_ticket_to_database(db_event_id, ticket_info):
             ticket_info.get("name"),
             ticket_info.get("price"),
             ticket_info.get("active"),
-            ticket_info.get("count"),
+            ticket_info.get("ticket_count"),
             ticket_info.get("max_count_per_person")
         ))
 
