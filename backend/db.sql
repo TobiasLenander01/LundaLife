@@ -8,6 +8,7 @@ CREATE TABLE events (
     name TEXT NOT NULL,
     description TEXT,
     address TEXT,
+    image TEXT,
     link TEXT,
     start_date TIMESTAMPTZ NOT NULL,
     end_date TIMESTAMPTZ

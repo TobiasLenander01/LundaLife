@@ -11,6 +11,7 @@ export async function GET() {
         name,
         description,
         address,
+        image,
         link,
         start_date,
         end_date

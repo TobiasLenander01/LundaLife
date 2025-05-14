@@ -155,6 +155,7 @@ def get_stuk_events(organisations):
                     "name": event_title,
                     "description": BeautifulSoup(event_description, "html.parser").get_text(),
                     "address": occurrence.get("address"),
+                    "image": event.get("image_url"),
                     "start_date": occurrence.get("start_date"),
                     "end_date": occurrence.get("end_date"),
                     "link": bouncer_link,
@@ -197,14 +198,15 @@ def add_event_to_database(event_details):
 
         # Define the SQL query to upsert an event
         upsert_query = """
-        INSERT INTO events (id, organization_id, organization_name, name, description, address, start_date, end_date, link)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO events (id, organization_id, organization_name, name, description, address, image, start_date, end_date, link)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (id) DO UPDATE SET
             organization_id = EXCLUDED.organization_id,
             organization_name = EXCLUDED.organization_name,
             name = EXCLUDED.name,
             description = EXCLUDED.description,
             address = EXCLUDED.address,
+            image = EXCLUDED.image,
             start_date = EXCLUDED.start_date,
             end_date = EXCLUDED.end_date,
             link = EXCLUDED.link
@@ -219,6 +221,7 @@ def add_event_to_database(event_details):
             event_details["name"],
             event_details["description"],
             event_details["address"],
+            event_details["image"],
             event_details["start_date"],
             event_details["end_date"],
             event_details["link"]
