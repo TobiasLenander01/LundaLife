@@ -22,7 +22,7 @@ export default function EventsPage() {
                     <p className="text-sm text-gray-500">
                         {new Date(event.start_date).toLocaleString()} – {event.end_date ? new Date(event.end_date).toLocaleString() : 'TBD'}
                     </p>
-                    <p className="text-sm mt-2 italic">Hosted by {event.nation_name} ({event.nation_address})</p>
+                    <p className="text-sm mt-2 italic">Hosted by {event.organization_name} ({event.address})</p>
                     {event.link && (
                         <a href={event.link} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
                             More Info

@@ -11,159 +11,171 @@ load_dotenv()
 # Database connection URL
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Nation names and their corresponding IDs
-NATIONS = {
-    "Blekingskas": 2635,
-    "Göteborgs": 2653,
-    "Hallands": 2644,
-    "Helsingkronas": 2662,
-    "Kalmars": 2672,
-    "Kristianstads": 2680,
-    "Lunds": 2689,
-    "Malmös": 2698,
-    "Smålands": 2754,
-    "Sydskånskas": 2708,
-    "Västgötas": 2710,
-    "Wermlands": 2709,
-    "Östgötas": 2711
-}
+# Check if DATABASE_URL is set
+if DATABASE_URL is None:
+    print("DATABASE_URL is not set in the environment variables.")
+    exit(1)
 
 # Global counters for events and tickets added to the database
 total_events_processed = 0
 total_tickets_processed = 0
 
+# Define the STUK student organizations and their IDs
+STUK_ORGANISATIONS = {
+    "Blekingska Nationen": 2635,
+    "Göteborgs Nation": 2653,
+    "Hallands Nation": 2644,
+    "Helsingkrona Nation": 2662,
+    "Kalmar Nation": 2672,
+    "Kristianstads Nation": 2680,
+    "Lunds Nation": 2689,
+    "Malmö Nation": 2698,
+    "Smålands Nation": 2754,
+    "Studentlund": 2513,
+    "Sydskånska Nationen": 2708,
+    "Västgöta Nation": 2710,
+    "Wermlands Nation": 2709,
+    "Östgöta Nation": 2711
+}
+
 def main():
-
-    # Loop through each nation
-    for nation_name, nation_id in NATIONS.items():
-        
-        # Scrape events from STUK API
-        nation_stuk_events = get_stuk_data(nation_id)
-        
-        # Format the events for database insertion
-        events = format_events(nation_id, nation_stuk_events)
-        
-        # Check if events were found
-        if not events:
-            print(f"No events found for nation {nation_name} (ID: {nation_id})")
-            continue
-        
-        # Loop through each event
-        print("ADDING EVENTS TO DATABASE")
-        for event in events:
-            
-            # Add event to the database
-            db_event_id = add_event_to_database(event)
-
-            # If event insertion was successful
-            if db_event_id:
-                # Add associated tickets to the database
-                for ticket_details in event.get("tickets", []):
-                    add_ticket_to_database(db_event_id, ticket_details)
-            else:
-                # If event insertion failed, skip adding tickets
-                print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
-
-
-def get_stuk_data(nation_id):
-    # Define the URL for the STUK API
-    URL = f"https://api.studentkortet.se/organization/{nation_id}/organization-events"
+    # Scrape and format events from STUK
+    stuk_events = get_stuk_events(STUK_ORGANISATIONS)
     
-    # Make a GET request
-    response = requests.get(URL)
+    # Check if events were found
+    if not stuk_events:
+        print("No events found ")
+        return
     
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Return the JSON data
-        print(f"Request successful, status code {response.status_code}")
-        return response.json()
-    else:
-        # Print error message
-        print(f"Failed to fetch data for nation ID {nation_id}, status code {response.status_code}")
-        return None
+    # Loop through each event
+    print("ADDING EVENTS TO DATABASE")
+    for event in stuk_events:
+        
+        # Add event to the database
+        db_event_id = add_event_to_database(event)
 
+        # If event insertion was successful
+        if db_event_id:
+            # Add associated tickets to the database
+            for ticket_details in event.get("tickets", []):
+                add_ticket_to_database(db_event_id, ticket_details)
+        else:
+            # If event insertion failed, skip adding tickets
+            print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
 
-def format_events(nation_id, event_data):
+def get_stuk_events(organisations):
+    '''
+    Fetches events from STUK API and formats them for database insertion.
+    '''
+    
     # Create an empty list to store formatted events
     formatted_events = []
-
-    # Check if there is event data
-    if event_data is None:
-        print(f"No event data was given")
-        return []
-
-    # Loop through each event in the event data
-    for event in event_data:
-        print("Fetching: " + event.get("title"))
+    
+    # Loop through each organization
+    for org_name, org_id in organisations.items():
+        # Define the URL for the STUK API
+        URL = f"https://api.studentkortet.se/organization/{org_id}/organization-events"
         
-        # Get event details
-        event_title = event.get("title")
-        event_description = event.get("content")
+        # Make a GET request
+        response = requests.get(URL)
+        
+        # Check if the request was successful
+        if response.status_code != 200:
+            # Print error message
+            print(f"Failed to fetch data for {org_name}, status code {response.status_code}")
+            return None
+        
+        # Save the response data as JSON
+        print(f"Request successful, status code {response.status_code}")
+        event_data = response.json()
 
-        # Get each event occurrence
-        occurrences = event.get("organization_event_occurrences", [])
+        # Check if there is event data
+        if event_data is None:
+            print(f"No event data was given")
+            return []
 
-        # Loop through each occurrence
-        for occurrence in occurrences:
+        # Loop through each event in the event data
+        for event in event_data:
+            print("Fetching: " + event.get("title"))
             
-            # Create an empty list to store formatted tickets
-            formatted_tickets = []
+            # Get event details
+            event_title = event.get("title")
+            event_description = event.get("content")
 
-            # Get ticket data from the occurrence
-            ticket_data = occurrence.get("tickets", [])
+            # Get each event occurrence
+            occurrences = event.get("organization_event_occurrences", [])
 
-            # Check if there are tickets available
-            if ticket_data:
-                print("Tickets found for event: " + event_title)
+            # Loop through each occurrence
+            for occurrence in occurrences:
                 
-                # Loop through each ticket
-                for ticket in ticket_data:
-                    # Format the ticket data
-                    formatted_ticket = {
-                        "name": ticket.get("name"),
-                        "ticket_count": ticket.get("count"),
-                        "price": ticket.get("price"),
-                        "active": ticket.get("is_active"),
-                        "max_count_per_person": ticket.get("max_count_per_member")
-                    }
+                # Create an empty list to store formatted tickets
+                formatted_tickets = []
 
-                    # Add the formatted ticket to the list
-                    formatted_tickets.append(formatted_ticket)
-            else:
-                print("No tickets found for event: " + event_title)
+                # Get ticket data from the occurrence
+                ticket_data = occurrence.get("tickets", [])
 
-            # Create a bouncer link for the event
-            bouncer_link = f"https://ob.addreax.com/{nation_id}/events/{occurrence.get('organization_event_id')}/occur/{occurrence.get('id')}"
+                # Check if there are tickets available
+                if ticket_data:
+                    print("Tickets found for event: " + event_title)
+                    
+                    # Loop through each ticket
+                    for ticket in ticket_data:
+                        
+                        # Remove trailing zeros
+                        if ticket.get("price") is not None:
+                            price = ticket.get("price") / 100
+                        
+                        # Format the ticket data
+                        formatted_ticket = {
+                            "name": ticket.get("name"),
+                            "ticket_count": ticket.get("count"),
+                            "price": price,
+                            "active": ticket.get("is_active"),
+                            "max_count_per_person": ticket.get("max_count_per_member")
+                        }
 
-            # Create a formatted event dictionary
-            formatted_event = {
-                "occurrence_id": occurrence.get("id"),
-                "event_id": occurrence.get("organization_event_id"),
-                "start_date": occurrence.get("start_date"),
-                "end_date": occurrence.get("end_date"),
-                "address": occurrence.get("address"),
-                "nation_id": nation_id,
-                "name": event_title,
-                "description": BeautifulSoup(event_description, "html.parser").get_text(),
-                "tickets": formatted_tickets,
-                "link": bouncer_link
-            }
-            
-            # Get the current date and time
-            current_datetime = datetime.datetime.now()
-            event_start_datetime = datetime.datetime.strptime(occurrence.get("start_date"), "%Y-%m-%dT%H:%M:%S.%fZ")
-            
-            # Check if the event has already happened
-            if event_start_datetime < current_datetime:
-                print(f"Skipping {event_title}, has already happened.")
-                continue
-            
-            # Add the formatted event to the list
-            print("Adding event to list: " + event_title)
-            formatted_events.append(formatted_event)
+                        # Add the formatted ticket to the list
+                        formatted_tickets.append(formatted_ticket)
+                else:
+                    print("No tickets found for event: " + event_title)
 
+                # Create a bouncer link for the event
+                bouncer_link = f"https://ob.addreax.com/{org_id}/events/{occurrence.get('organization_event_id')}/occur/{occurrence.get('id')}"
+                
+                # Combine IDs
+                event_id = occurrence.get("organization_event_id")
+                occurrence_id = occurrence.get("id")
+                combined_id = f"{event_id}{occurrence_id}"
+
+                # Create a formatted event dictionary
+                formatted_event = {
+                    "id": combined_id,
+                    "organization_id": org_id,
+                    "organization_name": org_name,
+                    "name": event_title,
+                    "description": BeautifulSoup(event_description, "html.parser").get_text(),
+                    "address": occurrence.get("address"),
+                    "start_date": occurrence.get("start_date"),
+                    "end_date": occurrence.get("end_date"),
+                    "link": bouncer_link,
+                    "tickets": formatted_tickets
+                }
+                
+                # Get the current date and time
+                current_datetime = datetime.datetime.now()
+                event_start_datetime = datetime.datetime.strptime(occurrence.get("start_date"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                
+                # Check if the event has already happened
+                if event_start_datetime < current_datetime:
+                    print(f"Skipping {event_title}, has already happened.")
+                    continue
+                
+                # Add the formatted event to the list
+                print("Adding event to list: " + event_title)
+                formatted_events.append(formatted_event)
+                
     # Return the list of formatted events
-    print(f"Returning {len(formatted_events)} events for nation {nation_id}")
+    print(f"Returning {len(formatted_events)} events from STUK API")
     return formatted_events
 
 def add_event_to_database(event_details):
@@ -185,12 +197,14 @@ def add_event_to_database(event_details):
 
         # Define the SQL query to upsert an event
         upsert_query = """
-        INSERT INTO events (event_id, occurrence_id, nation_id, name, description, start_date, end_date, link)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (event_id, occurrence_id) DO UPDATE SET
-            nation_id = EXCLUDED.nation_id,
+        INSERT INTO events (id, organization_id, organization_name, name, description, address, start_date, end_date, link)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (id) DO UPDATE SET
+            organization_id = EXCLUDED.organization_id,
+            organization_name = EXCLUDED.organization_name,
             name = EXCLUDED.name,
             description = EXCLUDED.description,
+            address = EXCLUDED.address,
             start_date = EXCLUDED.start_date,
             end_date = EXCLUDED.end_date,
             link = EXCLUDED.link
@@ -199,11 +213,12 @@ def add_event_to_database(event_details):
         
         # Execute the query with the event details
         cursor.execute(upsert_query, (
-            event_details["event_id"],
-            event_details["occurrence_id"],
-            event_details["nation_id"],
+            event_details["id"],
+            event_details["organization_id"],
+            event_details["organization_name"],
             event_details["name"],
             event_details["description"],
+            event_details["address"],
             event_details["start_date"],
             event_details["end_date"],
             event_details["link"]
