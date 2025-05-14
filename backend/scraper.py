@@ -29,8 +29,8 @@ NATIONS = {
 }
 
 # Global counters for events and tickets added to the database
-total_events_added_to_db = 0
-total_tickets_added_to_db = 0
+total_events_processed = 0
+total_tickets_processed = 0
 
 def main():
 
@@ -166,68 +166,12 @@ def format_events(nation_id, event_data):
     print(f"Returning {len(formatted_events)} events for nation {nation_id}")
     return formatted_events
 
-
-
-def add_ticket_to_database(db_event_id, ticket_info):
-    """
-    Adds a ticket to the database for a given event.
-    """
-    global total_tickets_added_to_db
-    
-    # Reset variables
-    conn = None
-    cursor = None
-    
-    try:
-        # Connect to the database
-        conn = psycopg2.connect(DATABASE_URL)
-        cursor = conn.cursor()
-
-        # Define the SQL query to insert a ticket
-        insert_query = """
-        INSERT INTO tickets (event_id, name, price, active, count, max_count_per_person)
-        VALUES (%s, %s, %s, %s, %s, %s);
-        """
-        
-        # Execute the query with the ticket details
-        cursor.execute(insert_query, (
-            db_event_id, # This is the foreign key to the events table
-            ticket_info.get("name"),
-            ticket_info.get("price"),
-            ticket_info.get("active"),
-            ticket_info.get("ticket_count"),
-            ticket_info.get("max_count_per_person")
-        ))
-
-        # Commit the transaction
-        conn.commit()
-        
-        # Print info about the inserted ticket
-        print(f"Inserted ticket: '{ticket_info.get('name')}' for event ID {db_event_id}")
-        
-        # Increment the global counter for tickets added to the database
-        total_tickets_added_to_db += 1
-
-    except Exception as e:
-        # Print error message
-        print(f"Error inserting ticket '{ticket_info.get('name')}': {e}")
-        
-        # If an error occurs, rollback the transaction
-        if conn:
-            conn.rollback()
-    finally:
-        # Close the cursor and connection
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
 def add_event_to_database(event_details):
     """
-    Adds an event to the database and returns its auto-generated primary key (id).
-    Returns None if insertion fails.
+    Adds or updates an event in the database and returns its primary key (id).
+    Returns None if operation fails.
     """
-    global total_events_added_to_db
+    global total_events_processed
     
     # Reset variables
     conn = None
@@ -239,15 +183,22 @@ def add_event_to_database(event_details):
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
 
-        # Define the SQL query to insert an event
-        insert_query = """
+        # Define the SQL query to upsert an event
+        upsert_query = """
         INSERT INTO events (event_id, occurrence_id, nation_id, name, description, start_date, end_date, link)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (event_id, occurrence_id) DO UPDATE SET
+            nation_id = EXCLUDED.nation_id,
+            name = EXCLUDED.name,
+            description = EXCLUDED.description,
+            start_date = EXCLUDED.start_date,
+            end_date = EXCLUDED.end_date,
+            link = EXCLUDED.link
         RETURNING id;
         """
         
         # Execute the query with the event details
-        cursor.execute(insert_query, (
+        cursor.execute(upsert_query, (
             event_details["event_id"],
             event_details["occurrence_id"],
             event_details["nation_id"],
@@ -264,18 +215,18 @@ def add_event_to_database(event_details):
         # Commit the transaction
         conn.commit()
         
-        # Print info about the inserted event
-        print(f"Inserted event: '{event_details['name']}' with DB ID: {db_event_id}")
+        # Print info about the event
+        print(f"DATABASE Processed event: '{event_details['name']}' with DB ID: {db_event_id}")
         
         # Increment the global counter for events added to the database
-        total_events_added_to_db += 1
+        total_events_processed += 1
         
         # Return the auto-generated primary key (id)
         return db_event_id
 
     except Exception as e:
         # Print error message
-        print(f"Error inserting event {e}")
+        print(f"DATABASE Error processing event {e}")
         
         # If an error occurs, rollback the transaction
         if conn:
@@ -290,11 +241,70 @@ def add_event_to_database(event_details):
         if conn:
             conn.close()
 
+def add_ticket_to_database(db_event_id, ticket_info):
+    """
+    Adds or updates a ticket to the database for a given event.
+    """
+    global total_tickets_processed
+    
+    # Reset variables
+    conn = None
+    cursor = None
+    
+    try:
+        # Connect to the database
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        # Define the SQL query to upsert a ticket
+        upsert_query = """
+        INSERT INTO tickets (event_id, name, price, active, count, max_count_per_person)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (event_id, name) DO UPDATE SET
+            price = EXCLUDED.price,
+            active = EXCLUDED.active,
+            count = EXCLUDED.count,
+            max_count_per_person = EXCLUDED.max_count_per_person
+        RETURNING id; 
+        """
+        
+        # Execute the query with the ticket details
+        cursor.execute(upsert_query, (
+            db_event_id, # This is the foreign key to the events table
+            ticket_info.get("name"),
+            ticket_info.get("price"),
+            ticket_info.get("active"),
+            ticket_info.get("ticket_count"),
+            ticket_info.get("max_count_per_person")
+        ))
+
+        # Commit the transaction
+        conn.commit()
+        
+        # Print info about the ticket
+        print(f"DATABASE Processed ticket: '{ticket_info.get('name')}' for event ID {db_event_id}")
+        
+        # Increment the global counter for tickets added to the database
+        total_tickets_processed += 1
+
+    except Exception as e:
+        # Print error message
+        print(f"DATABASE Error processing ticket '{ticket_info.get('name')}': {e}")
+        
+        # If an error occurs, rollback the transaction
+        if conn:
+            conn.rollback()
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # Entry point for the script
 if __name__ == "__main__":
     print("Starting the script...")
     main()
     print("Script finished.")
-    print(f"Total events added to DB: {total_events_added_to_db}")
-    print(f"Total tickets added to DB: {total_tickets_added_to_db}")
+    print(f"Total events processed by database: {total_events_processed}")
+    print(f"Total tickets processed by database: {total_tickets_processed}")
