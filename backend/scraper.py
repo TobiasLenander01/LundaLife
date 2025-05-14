@@ -28,68 +28,97 @@ NATIONS = {
     "Östgötas": 2711
 }
 
-total_events_added_to_db = 0
-total_tickets_added_to_db = 0
+# Global counters for events and tickets added to the database
+total_events_processed = 0
+total_tickets_processed = 0
 
 def main():
 
+    # Loop through each nation
     for nation_name, nation_id in NATIONS.items():
-        nation_events = scrape_event_data(nation_id) # Test with a single nation ID
         
+        # Scrape events from STUK API
+        nation_stuk_events = get_stuk_data(nation_id)
+        
+        # Format the events for database insertion
+        events = format_events(nation_id, nation_stuk_events)
+        
+        # Check if events were found
+        if not events:
+            print(f"No events found for nation {nation_name} (ID: {nation_id})")
+            continue
+        
+        # Loop through each event
         print("ADDING EVENTS TO DATABASE")
-        for event in nation_events:
+        for event in events:
             
+            # Add event to the database
             db_event_id = add_event_to_database(event)
 
-            if db_event_id: # If event insertion was successful
-                
+            # If event insertion was successful
+            if db_event_id:
                 # Add associated tickets to the database
-                for ticket_details in event.get("tickets", []): # Use .get for safety
+                for ticket_details in event.get("tickets", []):
                     add_ticket_to_database(db_event_id, ticket_details)
-                    
-                    
             else:
+                # If event insertion failed, skip adding tickets
                 print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
 
 
-
-
-def get_event_data(nation_id):
+def get_stuk_data(nation_id):
+    # Define the URL for the STUK API
     URL = f"https://api.studentkortet.se/organization/{nation_id}/organization-events"
+    
+    # Make a GET request
     response = requests.get(URL)
-    print("RESPONSE CODE:")
-    print(response.status_code)
+    
+    # Check if the request was successful
     if response.status_code == 200:
+        # Return the JSON data
+        print(f"Request successful, status code {response.status_code}")
         return response.json()
-    print(f"Failed to fetch data for nation ID {nation_id}")
-    return None
+    else:
+        # Print error message
+        print(f"Failed to fetch data for nation ID {nation_id}, status code {response.status_code}")
+        return None
 
 
-def scrape_event_data(nation_id):
-    events = []
-    nation_event_data = get_event_data(nation_id)
+def format_events(nation_id, event_data):
+    # Create an empty list to store formatted events
+    formatted_events = []
 
-    if nation_event_data is None:
-        print(f"No event data found for nation_id {nation_id}. Skipping.")
+    # Check if there is event data
+    if event_data is None:
+        print(f"No event data was given")
         return []
 
-   
-    for event in nation_event_data:
+    # Loop through each event in the event data
+    for event in event_data:
+        print("Fetching: " + event.get("title"))
+        
+        # Get event details
         event_title = event.get("title")
         event_description = event.get("content")
-        print("Analyzing: " + event_title)
 
+        # Get each event occurrence
         occurrences = event.get("organization_event_occurrences", [])
 
+        # Loop through each occurrence
         for occurrence in occurrences:
-                               
-            tickets = []
+            
+            # Create an empty list to store formatted tickets
+            formatted_tickets = []
 
+            # Get ticket data from the occurrence
             ticket_data = occurrence.get("tickets", [])
 
+            # Check if there are tickets available
             if ticket_data:
                 print("Tickets found for event: " + event_title)
+                
+                # Loop through each ticket
                 for ticket in ticket_data:
+                    # Format the ticket data
                     formatted_ticket = {
                         "name": ticket.get("name"),
                         "ticket_count": ticket.get("count"),
@@ -98,12 +127,15 @@ def scrape_event_data(nation_id):
                         "max_count_per_person": ticket.get("max_count_per_member")
                     }
 
-                    tickets.append(formatted_ticket)
+                    # Add the formatted ticket to the list
+                    formatted_tickets.append(formatted_ticket)
             else:
                 print("No tickets found for event: " + event_title)
 
+            # Create a bouncer link for the event
             bouncer_link = f"https://ob.addreax.com/{nation_id}/events/{occurrence.get("organization_event_id")}/occur/{occurrence.get("id")}"
 
+            # Create a formatted event dictionary
             formatted_event = {
                 "occurrence_id": occurrence.get("id"),
                 "event_id": occurrence.get("organization_event_id"),
@@ -113,7 +145,7 @@ def scrape_event_data(nation_id):
                 "nation_id": nation_id,
                 "name": event_title,
                 "description": BeautifulSoup(event_description, "html.parser").get_text(),
-                "tickets": tickets,
+                "tickets": formatted_tickets,
                 "link": bouncer_link
             }
             
@@ -126,74 +158,20 @@ def scrape_event_data(nation_id):
                 print(f"Skipping {event_title}, has already happened.")
                 continue
             
+            # Add the formatted event to the list
             print("Adding event to list: " + event_title)
-            events.append(formatted_event)
+            formatted_events.append(formatted_event)
 
-    print(f"Adding NATION {nation_id} events to the database")
-    return events
-
-
-
-def add_ticket_to_database(db_event_id, ticket_info):
-    """
-    Adds a ticket to the database for a given event.
-    """
-    global total_tickets_added_to_db
-    
-    # Reset variables
-    conn = None
-    cursor = None
-    
-    try:
-        # Connect to the database
-        conn = psycopg2.connect(DATABASE_URL)
-        cursor = conn.cursor()
-
-        # Define the SQL query to insert a ticket
-        insert_query = """
-        INSERT INTO tickets (event_id, name, price, active, count, max_count_per_person)
-        VALUES (%s, %s, %s, %s, %s, %s);
-        """
-        
-        # Execute the query with the ticket details
-        cursor.execute(insert_query, (
-            db_event_id, # This is the foreign key to the events table
-            ticket_info.get("name"),
-            ticket_info.get("price"),
-            ticket_info.get("active"),
-            ticket_info.get("count"),
-            ticket_info.get("max_count_per_person")
-        ))
-
-        # Commit the transaction
-        conn.commit()
-        
-        # Print info about the inserted ticket
-        print(f"Inserted ticket: '{ticket_info.get('name')}' for event ID {db_event_id}")
-        
-        # Increment the global counter for tickets added to the database
-        total_tickets_added_to_db += 1
-
-    except Exception as e:
-        # Print error message
-        print(f"Error inserting ticket '{ticket_info.get('name')}': {e}")
-        
-        # If an error occurs, rollback the transaction
-        if conn:
-            conn.rollback()
-    finally:
-        # Close the cursor and connection
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+    # Return the list of formatted events
+    print(f"Returning {len(formatted_events)} events for nation {nation_id}")
+    return formatted_events
 
 def add_event_to_database(event_details):
     """
-    Adds an event to the database and returns its auto-generated primary key (id).
-    Returns None if insertion fails.
+    Adds or updates an event in the database and returns its primary key (id).
+    Returns None if operation fails.
     """
-    global total_events_added_to_db
+    global total_events_processed
     
     # Reset variables
     conn = None
@@ -205,15 +183,22 @@ def add_event_to_database(event_details):
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
 
-        # Define the SQL query to insert an event
-        insert_query = """
+        # Define the SQL query to upsert an event
+        upsert_query = """
         INSERT INTO events (event_id, occurrence_id, nation_id, name, description, start_date, end_date, link)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (event_id, occurrence_id) DO UPDATE SET
+            nation_id = EXCLUDED.nation_id,
+            name = EXCLUDED.name,
+            description = EXCLUDED.description,
+            start_date = EXCLUDED.start_date,
+            end_date = EXCLUDED.end_date,
+            link = EXCLUDED.link
         RETURNING id;
         """
         
         # Execute the query with the event details
-        cursor.execute(insert_query, (
+        cursor.execute(upsert_query, (
             event_details["event_id"],
             event_details["occurrence_id"],
             event_details["nation_id"],
@@ -230,18 +215,18 @@ def add_event_to_database(event_details):
         # Commit the transaction
         conn.commit()
         
-        # Print info about the inserted event
-        print(f"Inserted event: '{event_details['name']}' with DB ID: {db_event_id}")
+        # Print info about the event
+        print(f"DATABASE Processed event: '{event_details['name']}' with DB ID: {db_event_id}")
         
         # Increment the global counter for events added to the database
-        total_events_added_to_db += 1
+        total_events_processed += 1
         
         # Return the auto-generated primary key (id)
         return db_event_id
 
     except Exception as e:
         # Print error message
-        print(f"Error inserting event {e}")
+        print(f"DATABASE Error processing event {e}")
         
         # If an error occurs, rollback the transaction
         if conn:
@@ -256,11 +241,70 @@ def add_event_to_database(event_details):
         if conn:
             conn.close()
 
+def add_ticket_to_database(db_event_id, ticket_info):
+    """
+    Adds or updates a ticket to the database for a given event.
+    """
+    global total_tickets_processed
+    
+    # Reset variables
+    conn = None
+    cursor = None
+    
+    try:
+        # Connect to the database
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        # Define the SQL query to upsert a ticket
+        upsert_query = """
+        INSERT INTO tickets (event_id, name, price, active, count, max_count_per_person)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (event_id, name) DO UPDATE SET
+            price = EXCLUDED.price,
+            active = EXCLUDED.active,
+            count = EXCLUDED.count,
+            max_count_per_person = EXCLUDED.max_count_per_person
+        RETURNING id; 
+        """
+        
+        # Execute the query with the ticket details
+        cursor.execute(upsert_query, (
+            db_event_id, # This is the foreign key to the events table
+            ticket_info.get("name"),
+            ticket_info.get("price"),
+            ticket_info.get("active"),
+            ticket_info.get("ticket_count"),
+            ticket_info.get("max_count_per_person")
+        ))
+
+        # Commit the transaction
+        conn.commit()
+        
+        # Print info about the ticket
+        print(f"DATABASE Processed ticket: '{ticket_info.get('name')}' for event ID {db_event_id}")
+        
+        # Increment the global counter for tickets added to the database
+        total_tickets_processed += 1
+
+    except Exception as e:
+        # Print error message
+        print(f"DATABASE Error processing ticket '{ticket_info.get('name')}': {e}")
+        
+        # If an error occurs, rollback the transaction
+        if conn:
+            conn.rollback()
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # Entry point for the script
 if __name__ == "__main__":
     print("Starting the script...")
     main()
     print("Script finished.")
-    print(f"Total events added to DB: {total_events_added_to_db}")
-    print(f"Total tickets added to DB: {total_tickets_added_to_db}")
+    print(f"Total events processed by database: {total_events_processed}")
+    print(f"Total tickets processed by database: {total_tickets_processed}")
