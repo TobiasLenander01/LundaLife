@@ -133,7 +133,7 @@ def format_events(nation_id, event_data):
                 print("No tickets found for event: " + event_title)
 
             # Create a bouncer link for the event
-            bouncer_link = f"https://ob.addreax.com/{nation_id}/events/{occurrence.get("organization_event_id")}/occur/{occurrence.get("id")}"
+            bouncer_link = f"https://ob.addreax.com/{nation_id}/events/{occurrence.get('organization_event_id')}/occur/{occurrence.get('id')}"
 
             # Create a formatted event dictionary
             formatted_event = {
