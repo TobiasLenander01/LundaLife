@@ -120,11 +120,16 @@ def get_stuk_events(organisations):
                     
                     # Loop through each ticket
                     for ticket in ticket_data:
+                        
+                        # Remove trailing zeros
+                        if ticket.get("price") is not None:
+                            price = ticket.get("price") / 100
+                        
                         # Format the ticket data
                         formatted_ticket = {
                             "name": ticket.get("name"),
                             "ticket_count": ticket.get("count"),
-                            "price": ticket.get("price"),
+                            "price": price,
                             "active": ticket.get("is_active"),
                             "max_count_per_person": ticket.get("max_count_per_member")
                         }
