@@ -20,27 +20,26 @@ if DATABASE_URL is None:
 total_events_processed = 0
 total_tickets_processed = 0
 
-# Define the STUK student organizations and their IDs
-STUK_ORGANISATIONS = {
-    "Blekingska Nationen": 2635,
-    "Göteborgs Nation": 2653,
-    "Hallands Nation": 2644,
-    "Helsingkrona Nation": 2662,
-    "Kalmar Nation": 2672,
-    "Kristianstads Nation": 2680,
-    "Lunds Nation": 2689,
-    "Malmö Nation": 2698,
-    "Smålands Nation": 2754,
-    "Studentlund": 2513,
-    "Sydskånska Nationen": 2708,
-    "Västgöta Nation": 2710,
-    "Wermlands Nation": 2709,
-    "Östgöta Nation": 2711
-}
+ORGANISATIONS = [
+    { "name": "Blekingska Nationen", "id": 2635, "address": "Ole römers väg 14D, 22363, Lund" },
+    { "name": "Göteborgs Nation", "id": 2653, "address": "Östra Mårtensgatan 15, 223 61, Lund" },
+    { "name": "Hallands Nation", "id": 2644, "address": "Thomanders väg 3, 224 65, Lund" },
+    { "name": "Helsingkrona Nation", "id": 2662, "address": "Tornavägen 3C, 223 64, Lund" },
+    { "name": "Kalmar Nation", "id": 2672, "address": "Biskopsgatan 12, 22362, Lund" },
+    { "name": "Kristianstads Nation", "id": 2680, "address": "Tornavägen 7, 22363, Lund" },
+    { "name": "Lunds Nation", "id": 2689, "address": "Agardhsgatan 1, 22351, Lund" },
+    { "name": "Malmö Nation", "id": 2698, "address": "Ö:a Vallgatan 51, 22361, Lund" },
+    { "name": "Smålands Nation", "id": 2754, "address": "Kastanjegatan 7, 223 59, Lund" },
+    { "name": "Studentlund", "id": 2513, "address": "Sandgatan 2, 22350, Lund" },
+    { "name": "Sydskånska Nationen", "id": 2708, "address": "Tornavägen 5, 223 63, Lund" },
+    { "name": "Västgöta Nation", "id": 2710, "address": "Tornavägen 17-19, 223 64, Lund" },
+    { "name": "Wermlands Nation", "id": 2709, "address": "Stora Tvärgatan 13, 22353, Lund" },
+    { "name": "Östgöta Nation", "id": 2711, "address": "Adelgatan 4, 22350, Lund" }
+]
 
 def main():
     # Scrape and format events from STUK
-    stuk_events = get_stuk_events(STUK_ORGANISATIONS)
+    stuk_events = get_stuk_events(ORGANISATIONS)
     
     # Check if events were found
     if not stuk_events:
@@ -72,9 +71,9 @@ def get_stuk_events(organisations):
     formatted_events = []
     
     # Loop through each organization
-    for org_name, org_id in organisations.items():
+    for organization in organisations:
         # Define the URL for the STUK API
-        URL = f"https://api.studentkortet.se/organization/{org_id}/organization-events"
+        URL = f"https://api.studentkortet.se/organization/{organization['id']}/organization-events"
         
         # Make a GET request
         response = requests.get(URL)
@@ -82,7 +81,7 @@ def get_stuk_events(organisations):
         # Check if the request was successful
         if response.status_code != 200:
             # Print error message
-            print(f"Failed to fetch data for {org_name}, status code {response.status_code}")
+            print(f"Failed to fetch data for {organization['name']}, status code {response.status_code}")
             return None
         
         # Save the response data as JSON
@@ -140,21 +139,27 @@ def get_stuk_events(organisations):
                     print("No tickets found for event: " + event_title)
 
                 # Create a bouncer link for the event
-                bouncer_link = f"https://ob.addreax.com/{org_id}/events/{occurrence.get('organization_event_id')}/occur/{occurrence.get('id')}"
+                bouncer_link = f"https://ob.addreax.com/{organization['id']}/events/{occurrence.get('organization_event_id')}/occur/{occurrence.get('id')}"
                 
                 # Combine IDs
                 event_id = occurrence.get("organization_event_id")
                 occurrence_id = occurrence.get("id")
                 combined_id = f"{event_id}{occurrence_id}"
+                
+                # Check if there is an address in the event
+                address = occurrence.get("address")
+                if not address:
+                    # If no address, use the organization's address
+                    address = organization['address']
 
                 # Create a formatted event dictionary
                 formatted_event = {
                     "id": combined_id,
-                    "organization_id": org_id,
-                    "organization_name": org_name,
+                    "organization_id": organization['id'],
+                    "organization_name": organization['name'],
                     "name": event_title,
                     "description": BeautifulSoup(event_description, "html.parser").get_text(),
-                    "address": occurrence.get("address"),
+                    "address": address,
                     "image": event.get("image_url"),
                     "start_date": occurrence.get("start_date"),
                     "end_date": occurrence.get("end_date"),
