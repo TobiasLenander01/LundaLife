@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,10 +30,7 @@ export default function RootLayout({
       >
         <div className="relative min-h-screen pb-14">
           {children}
-          <nav className="fixed bottom-0 left-0 right-0 h-14 bg-black border-t border-gray-200 shadow z-50 flex items-center justify-around">
-            <Link href="/">Map</Link>
-            <Link href="/events">Events</Link>
-          </nav>
+          <Navbar/>
         </div>
       </body>
     </html>
