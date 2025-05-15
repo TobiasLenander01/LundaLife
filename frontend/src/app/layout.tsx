@@ -30,7 +30,7 @@ export default function RootLayout({
       >
         <div className="relative min-h-screen pb-14">
           {children}
-          <Navbar />
+          <Navbar/>
         </div>
       </body>
     </html>
