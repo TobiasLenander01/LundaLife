@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Searchbar from "@/components/Searchbar"
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="relative min-h-screen pb-14">
+          <Searchbar />
           {children}
           <Navbar/>
         </div>
