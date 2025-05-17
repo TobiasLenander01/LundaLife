@@ -4,6 +4,8 @@ import os
 import psycopg2
 import datetime
 import requests
+import json
+import subprocess
 
 # Load environment variables from .env
 load_dotenv()
@@ -38,29 +40,34 @@ ORGANISATIONS = [
 ]
 
 def main():
-    # Scrape and format events from STUK
-    stuk_events = get_stuk_events(ORGANISATIONS)
-    
-    # Check if events were found
-    if not stuk_events:
-        print("No events found ")
-        return
-    
-    # Loop through each event
-    print("ADDING EVENTS TO DATABASE")
-    for event in stuk_events:
-        
-        # Add event to the database
-        db_event_id = add_event_to_database(event)
+    url = 'https://www.facebook.com/events/594743246679622'
+    data = get_facebook_event(url)
+    print(data)
 
-        # If event insertion was successful
-        if db_event_id:
-            # Add associated tickets to the database
-            for ticket_details in event.get("tickets", []):
-                add_ticket_to_database(db_event_id, ticket_details)
-        else:
-            # If event insertion failed, skip adding tickets
-            print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
+# def main():
+#     # Scrape and format events from STUK
+#     stuk_events = get_stuk_events(ORGANISATIONS)
+    
+#     # Check if events were found
+#     if not stuk_events:
+#         print("No events found ")
+#         return
+    
+#     # Loop through each event
+#     print("ADDING EVENTS TO DATABASE")
+#     for event in stuk_events:
+        
+#         # Add event to the database
+#         db_event_id = add_event_to_database(event)
+
+#         # If event insertion was successful
+#         if db_event_id:
+#             # Add associated tickets to the database
+#             for ticket_details in event.get("tickets", []):
+#                 add_ticket_to_database(db_event_id, ticket_details)
+#         else:
+#             # If event insertion failed, skip adding tickets
+#             print(f"Skipping tickets for event '{event['name']}' due to insertion error.")
 
 def get_stuk_events(organisations):
     '''
@@ -183,6 +190,24 @@ def get_stuk_events(organisations):
     # Return the list of formatted events
     print(f"Returning {len(formatted_events)} events from STUK API")
     return formatted_events
+
+def get_facebook_event(event_url):
+    try:
+        result = subprocess.run(
+            ['node', 'helper.mjs', event_url],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        # Parse the JSON output
+        event_data = json.loads(result.stdout)
+        return event_data
+
+    except subprocess.CalledProcessError as e:
+        print("Node.js script error:", e.stderr)
+    except json.JSONDecodeError:
+        print("Failed to parse JSON:", result.stdout)
+    
 
 def add_event_to_database(event_details):
     """
