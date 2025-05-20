@@ -15,7 +15,7 @@ ORGANISATIONS = [
     { "name": "Sydskånska Nationen", "address": "Tornavägen 5, 223 63, Lund", "stuk_id": 2708 },
     { "name": "Västgöta Nation", "address": "Tornavägen 17-19, 223 64, Lund", "stuk_id": 2710 },
     { "name": "Wermlands Nation", "address": "Stora Tvärgatan 13, 22353, Lund", "stuk_id": 2709 },
-    { "name": "Östgöta Nation", "address": "Adelgatan 4, 22350, Lund", "stuk_id": 2711, "fb_id": 1144572210449522 }
+    { "name": "Östgöta Nation", "address": "Adelgatan 4, 22350, Lund", "stuk_id": 2711, "fb_id": 100064521016782 }
 ]
 
 def main():

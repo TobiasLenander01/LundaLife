@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-from bs4 import BeautifulSoup
-import json
+import json as json_module
 
 def get_facebook_event(fbid):
     
@@ -36,22 +35,28 @@ def get_facebook_event(fbid):
     soup = BeautifulSoup(html, 'html.parser')
     
     # Convert html to json
-    event_data = soup_to_json(soup)
+    json = soup_to_json(soup)
     
-    # Find Open Graph image
-    og_image = soup.find("meta", property="og:image")
-    if og_image and og_image.get("content"):
-        image = og_image["content"]
+    # Find event from json data
+    event = find_event_recursively(json)
+    
+    # Save data to files
+    with open("soup.html", "w", encoding="utf-8") as f:
+        f.write(soup.prettify())
+    with open("data.json", "w", encoding="utf-8") as f:
+        json_module.dump(json, f, ensure_ascii=False, indent=4)
+    with open("event.json", "w", encoding="utf-8") as f:
+        json_module.dump(json, f, ensure_ascii=False, indent=4)
     
     # Format event data in a dictionary
     formatted_event = {
-        "id": event_data["id"],
-        "organization_id": event_data["event_creator"]["id"],
-        "organization_name": event_data["event_creator"]["name"],
+        "id": event["id"],
+        "organization_id": event["event_creator"]["id"],
+        "organization_name": event["event_creator"]["name"],
         "name": soup.title.string if soup.title else "Event",
-        "description": event_data["event_description"]["text"],
-        "address": event_data["event_place"]["contextual_name"],
-        "image": image,
+        "description": event["event_description"]["text"],
+        "address": event["event_place"]["contextual_name"],
+        "image": soup.find("meta", property="og:image").get("content"),
         "start_date": None,
         "end_date": None,
         "link": url
@@ -66,41 +71,33 @@ def soup_to_json(soup):
     tags = soup.find_all('script', type='application/json')
     
     # Create an empty dictionary
-    data = {}
+    json = {}
 
     # Loop through each tag
     for tag in tags:
         # Parse json from tag
         json_raw = tag.get_text(strip=True)
-        json_parsed = json.loads(json_raw)
+        json_parsed = json_module.loads(json_raw)
         
         # Loop through each key, value pair in parsed json
         for key, value in json_parsed.items():
             
             # Check if key is already in dictionary
-            if key not in data:
+            if key not in json:
                 # If it isn't, then add the key value pair
-                data[key] = value
+                json[key] = value
             else:
                 # If it is, create a new unique key
                 i = 1
                 new_key = f"{key}_{i}"
-                while new_key in data:
+                while new_key in json:
                     i += 1
                     new_key = f"{key}_{i}"
                     
                 # Add to dictionary
-                data[new_key] = value
+                json[new_key] = value
     
-    event_data_dict = find_event_recursively(data)
-    
-    # Save the event data dictionary to a file
-    filename = 'data_event.json'
-    with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(event_data_dict, f, ensure_ascii=False, indent=4)
-        print("Saved event data to " + filename)
-        
-    return event_data_dict
+    return json
 
     
 def find_event_recursively(data_node):
@@ -135,4 +132,4 @@ def find_event_recursively(data_node):
 
 event = get_facebook_event(1144572210449522)
 print()
-print(json.dumps(event, indent=4, ensure_ascii=False))
+print(json_module.dumps(event, indent=4, ensure_ascii=False))
