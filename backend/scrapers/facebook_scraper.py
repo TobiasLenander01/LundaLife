@@ -42,9 +42,9 @@ def get_facebook_events(organization):
         start_datetime = datetime.fromtimestamp(start_timestamp, tz=timezone.utc)
         
         # Check if the event has already happened
-        # if start_datetime < current_date:
-        #     print(f"Skipping facebook event with id {fb_event_id} {start_datetime} has already happened.")
-        #     continue
+        if start_datetime < current_date:
+            print(f"Skipping facebook event with id {fb_event_id} {start_datetime} has already happened.")
+            continue
         
         # Get and format event
         event = get_facebook_event(organization, fb_event_id)
