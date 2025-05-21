@@ -38,37 +38,18 @@ def get_facebook_event(fbid):
     # Get json data from html
     json = soup_to_json(soup)
     
-    # Find relevant data in json
-    # event_data = find(json, ["start_timestamp", "end_timestamp", "cover_media_renderer", "title", "event_description", "event_place", "event_privacy_info"])
-    
-    key_paths = [
-        "event_description/text",
-        "event_place/name",
-        "full_image/uri"
-    ]
-    
-    event_data = find_paths(json, key_paths)
-    
-    print(event_data)
-    
-    # Save to files
-    with open(f"facebook_event_{fbid}_raw.json", "w", encoding="utf-8") as f:
-        json_module.dump(json, f, ensure_ascii=False, indent=4)
-    with open(f"facebook_event_{fbid}_event.json", "w", encoding="utf-8") as f:
-        json_module.dump(event_data, f, ensure_ascii=False, indent=4)
-    
     # Format event data in a dictionary
     formatted_event = {
-        "id": fbid,
-        # "organization_id": event_data["event_privacy_info"]["title"]["ranges"][0]["entity"]["id"],
-        # "organization_name": event_data["event_privacy_info"]["title"]["ranges"][0]["entity"]["short_name"],
-        # "name": event_data["title"],
-        # "description": event_data["event_description"]["text"],
-        # "address": event_data["event_place"]["name"],
-        # "image": event_data["cover_media_renderer"]["cover_photo"]["photo"]["full_image"]["uri"],
-        # "start_date": str(datetime.fromtimestamp(event_data["start_timestamp"])),
-        # "end_date": str(datetime.fromtimestamp(event_data["end_timestamp"])),
-        # "link": url
+        "id": find(json, "params/event_id"),
+        "organization_id": find(json, "entity/id"),
+        "organization_name": find(json, "entity/short_name"),
+        "name": find(json, "meta/title"),
+        "description": find(json, "event_description/text"),
+        "address": find(json, "event_place/contextual_name"),
+        "image": find(json, "full_image/uri"),
+        "start_date": str(datetime.fromtimestamp(find(json, "data/start_timestamp"))),
+        "end_date": str(datetime.fromtimestamp(find(json, "data/end_timestamp"))),
+        "link": find(json, "event/url")
     }
     
     # Return the formatted event dictionary
@@ -108,52 +89,41 @@ def soup_to_json(soup):
     
     return json
 
-def find_paths(data, key_paths):
-    results = {}
-    target_paths = [tuple(path.split("/")) for path in key_paths]
-    found_paths = set()
+def find(data, key_path):
+    # Split the key_path string into a list of keys
+    target_path = key_path.split("/")
+    
+    # Initialize the result variable to None
+    result = None
 
+    # Define a recursive search function
     def search(obj, parents):
-        if len(found_paths) == len(target_paths):
-            return  # All paths found
+        nonlocal result  # Allow modification of result in the outer scope
+        if result is not None:
+            return  # Stop searching if result is already found
 
         if isinstance(obj, dict):
+            # Iterate through each key-value pair in the dictionary
             for key, value in obj.items():
+                # Build the current path of keys
                 current_parents = parents + [key]
-                for path in target_paths:
-                    if path in found_paths:
-                        continue
-                    if len(current_parents) >= 2 and tuple(current_parents[-2:]) == path:
-                        results["/".join(path)] = value
-                        found_paths.add(path)
+                # Check if the end of the current path matches the target path
+                if len(current_parents) >= len(target_path) and current_parents[-len(target_path):] == target_path:
+                    result = value  # Set result if path matches
+                    return
+                # Recursively search the value
                 search(value, current_parents)
 
         elif isinstance(obj, list):
+            # Iterate through each item in the list
             for item in obj:
+                # Recursively search each item
                 search(item, parents)
 
+    # Start the search with the initial data and an empty parent path
     search(data, [])
-    return results
-
-def find(json, target_keys):
-    found = {}
-    target_keys_set = set(target_keys)
-
-    def search(obj):
-        if len(found) == len(target_keys_set):
-            return  # Stop if all keys have been found
-
-        if isinstance(obj, dict):
-            for key, value in obj.items():
-                if key in target_keys_set and key not in found:
-                    found[key] = value
-                search(value)
-        elif isinstance(obj, list):
-            for item in obj:
-                search(item)
-
-    search(json)
-    return found
+    # Return the found result, or None if not found
+    return result
 
 event = get_facebook_event(1144572210449522)
 print()
