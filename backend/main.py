@@ -1,7 +1,8 @@
 from scrapers import facebook_scraper, stuk_scraper
 from database import database as db
+import json
 
-ORGANISATIONS = [
+ORGANIZATIONS = [
     { "name": "Blekingska Nationen", "address": "Ole römers väg 14D, 22363, Lund", "stuk_id": 2635 },
     { "name": "Göteborgs Nation", "address": "Östra Mårtensgatan 15, 223 61, Lund", "stuk_id": 2653 },
     { "name": "Hallands Nation", "address": "Thomanders väg 3, 224 65, Lund", "stuk_id": 2644 },
@@ -19,29 +20,36 @@ ORGANISATIONS = [
 ]
 
 def main():
-    # Scrape and format events from STUK
-    events = stuk_scraper.get_stuk_events(ORGANISATIONS)
     
-    # Check if events were found
-    if not events:
-        print("No events found ")
-        return
+    # Create an empty list to store events
+    events = []
     
-    # Loop through each event
-    print("ADDING EVENTS TO DATABASE")
-    for event in events:
+    # Loop through each organization
+    for organization in ORGANIZATIONS:
         
-        # Add event to the database
-        db_event_id = db.add_event(event)
+        # Scrape facebook events
+        events.extend(facebook_scraper.get_facebook_events(organization))
+    
+    
+    with open("events.json", "w", encoding="utf-8") as f:
+        json.dump(events, f, ensure_ascii=False, indent=2)
+    
+    
+    # DATABASE INSERTION
+    # print("ADDING EVENTS TO DATABASE")
+    # for event in events:
+        
+    #     # Add event to the database
+    #     db_event_id = db.add_event(event)
 
-        # If event insertion was successful
-        if db_event_id:
-            # Add associated tickets to the database
-            for ticket_details in event.get("tickets", []):
-                db.add_ticket(db_event_id, ticket_details)
-        else:
-            # If event insertion failed, skip adding tickets
-            print(f"Skipping tickets for {event['name']}.")
+    #     # If event insertion was successful
+    #     if db_event_id:
+    #         # Add associated tickets to the database
+    #         for ticket_details in event.get("tickets", []):
+    #             db.add_ticket(db_event_id, ticket_details)
+    #     else:
+    #         # If event insertion failed, skip adding tickets
+    #         print(f"Skipping tickets for {event['name']}.")
     
 
 # Entry point for the script
