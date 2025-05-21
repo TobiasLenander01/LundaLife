@@ -110,3 +110,43 @@ dmypy.json
 
 # Logs
 *.log
+
+# Backend dependencies
+/backend/node_modules
+/backend/.pnp
+/backend/.pnp.*
+/backend/.yarn/*
+!/backend/.yarn/patches
+!/backend/.yarn/plugins
+!/backend/.yarn/releases
+!/backend/.yarn/versions
+
+# Frontend testing
+/backend/coverage
+
+# Next.js (if used inside frontend)
+/backend/.next/
+/backend/out/
+
+# Frontend production build
+/backend/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Env files
+/backend/.env*
+
+# Vercel (if used inside frontend)
+backend/.vercel
+
+# TypeScript
+/backend/*.tsbuildinfo
+/backend/next-env.d.ts
