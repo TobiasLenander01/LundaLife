@@ -56,7 +56,7 @@ def get_stuk_events(organization):
             
             # Check if the event has already happened
             if event_date < current_date:
-                print(f"Skipping {utils.find(occurrence, "organization_event/title")[0]} {event_date}, has already happened.")
+                print(f"Skipping stuk event {utils.find(occurrence, "organization_event/title")[0]} {event_date}, has already happened.")
                 continue
             
             # Format the occurrence as an event
@@ -89,8 +89,10 @@ def format_stuk_event(organization, event, occurrence):
     end_date = end_date.replace(tzinfo=timezone.utc)
     end_datestring = str(end_date)
     
+    print(f"STUK START DATE: {start_datestring}") # 2025-06-06 17:00:00+00:00
+    
     # Create a formatted event
-    event = {
+    formatted_event = {
         "id": f"{organization['stuk_org_id']}{event["id"]}{occurrence["id"]}",
         "organization_id": organization["stuk_org_id"],
         "organization_name": occurrence["organization_event"]["organization"]["name"],
@@ -103,37 +105,43 @@ def format_stuk_event(organization, event, occurrence):
         "link": bouncer_link
     }
     
-    # Return the formatted event
-    return event
+    # Add tickets to event
+    tickets = get_stuk_tickets(occurrence)
+    if tickets:
+        print(f"Tickets found for {formatted_event["name"]}")
+        formatted_event["tickets"] = tickets
     
-def get_stuk_tickets(event):
+    # Return the formatted event
+    return formatted_event
+    
+def get_stuk_tickets(occurrence):
+    
     # Create an empty list to store formatted tickets
     tickets = []
 
     # Get ticket data from the occurrence
-    ticket_data = event.get("tickets", [])
+    ticket_data = occurrence.get("tickets")
 
     # Check if there are tickets available
-    if ticket_data:
-        print(f"Tickets found for stuk event: {event["name"]}")
+    if not ticket_data:
+        return []
         
-        # Loop through each ticket
-        for ticket in ticket_data:
-            
-            # Remove trailing zeros
-            if ticket.get("price") is not None:
-                price = ticket.get("price") / 100
-            
-            # Format the ticket data
-            formatted_ticket = {
-                "name": ticket.get("name"),
-                "ticket_count": ticket.get("count"),
-                "price": price,
-                "active": ticket.get("is_active"),
-                "max_count_per_person": ticket.get("max_count_per_member")
-            }
+    # Loop through each ticket
+    for ticket in ticket_data:
+        
+        # Remove trailing zeros
+        price = ticket["price"] / 100
+        
+        # Format the ticket data
+        formatted_ticket = {
+            "name": ticket["name"],
+            "ticket_count": ticket["count"],
+            "price": price,
+            "active": ticket.get("is_active"),
+            "max_count_per_person": ticket.get("max_count_per_member")
+        }
 
-            # Add the formatted ticket to the list
-            tickets.append(formatted_ticket)
-    else:
-        print(f"No tickets found for event: {event["name"]}")
+        # Add the formatted ticket to the list
+        tickets.append(formatted_ticket)
+        
+    return tickets

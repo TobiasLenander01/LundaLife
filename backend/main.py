@@ -27,8 +27,12 @@ def main():
     # Loop through each organization
     for organization in ORGANIZATIONS:
         
+        print(f"STARTED SCRAPING FACEBOOK EVENTS FOR {organization["name"]}")
+        
         # Add facebook events to list
         events.extend(facebook_scraper.get_facebook_events(organization))
+        
+        print(f"STARTED SCRAPING STUK EVENTS FOR {organization["name"]}")
         
         # Add stuk events to list
         events.extend(stuk_scraper.get_stuk_events(organization))

@@ -46,7 +46,7 @@ def get_facebook_events(organization):
         
         # Check if the event has already happened
         if start_datetime < current_date:
-            print(f"Skipping facebook event with id {fb_event_id} has already happened.")
+            print(f"Skipping facebook event with id {fb_event_id} {start_datetime} has already happened.")
             continue
         
         # Get and format event
@@ -86,6 +86,8 @@ def get_facebook_event(fb_event_id):
     end_timestamp = utils.find(json, "data/end_timestamp")[0]
     end_datetime = datetime.fromtimestamp(end_timestamp, tz=timezone.utc)
     end_datestring = end_datetime.strftime(utils.TIME_FORMAT) + "Z"
+    
+    print(f"FACEBOOK START DATE: {start_datestring}")
     
     # Format event data in a dictionary
     event = {
