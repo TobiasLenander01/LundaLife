@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import json as json_module
+from datetime import datetime
 
 def get_facebook_event(fbid):
     
@@ -34,32 +35,40 @@ def get_facebook_event(fbid):
     # Format respone html text with beautiful soup
     soup = BeautifulSoup(html, 'html.parser')
     
-    # Convert html to json
+    # Get json data from html
     json = soup_to_json(soup)
     
-    # Find event from json data
-    event = find_event_recursively(json)
+    # Find relevant data in json
+    # event_data = find(json, ["start_timestamp", "end_timestamp", "cover_media_renderer", "title", "event_description", "event_place", "event_privacy_info"])
     
-    # Save data to files
-    with open("soup.html", "w", encoding="utf-8") as f:
-        f.write(soup.prettify())
-    with open("data.json", "w", encoding="utf-8") as f:
+    key_paths = [
+        "event_description/text",
+        "event_place/name",
+        "full_image/uri"
+    ]
+    
+    event_data = find_paths(json, key_paths)
+    
+    print(event_data)
+    
+    # Save to files
+    with open(f"facebook_event_{fbid}_raw.json", "w", encoding="utf-8") as f:
         json_module.dump(json, f, ensure_ascii=False, indent=4)
-    with open("event.json", "w", encoding="utf-8") as f:
-        json_module.dump(json, f, ensure_ascii=False, indent=4)
+    with open(f"facebook_event_{fbid}_event.json", "w", encoding="utf-8") as f:
+        json_module.dump(event_data, f, ensure_ascii=False, indent=4)
     
     # Format event data in a dictionary
     formatted_event = {
-        "id": event["id"],
-        "organization_id": event["event_creator"]["id"],
-        "organization_name": event["event_creator"]["name"],
-        "name": soup.title.string if soup.title else "Event",
-        "description": event["event_description"]["text"],
-        "address": event["event_place"]["contextual_name"],
-        "image": soup.find("meta", property="og:image").get("content"),
-        "start_date": None,
-        "end_date": None,
-        "link": url
+        "id": fbid,
+        # "organization_id": event_data["event_privacy_info"]["title"]["ranges"][0]["entity"]["id"],
+        # "organization_name": event_data["event_privacy_info"]["title"]["ranges"][0]["entity"]["short_name"],
+        # "name": event_data["title"],
+        # "description": event_data["event_description"]["text"],
+        # "address": event_data["event_place"]["name"],
+        # "image": event_data["cover_media_renderer"]["cover_photo"]["photo"]["full_image"]["uri"],
+        # "start_date": str(datetime.fromtimestamp(event_data["start_timestamp"])),
+        # "end_date": str(datetime.fromtimestamp(event_data["end_timestamp"])),
+        # "link": url
     }
     
     # Return the formatted event dictionary
@@ -99,36 +108,52 @@ def soup_to_json(soup):
     
     return json
 
-    
-def find_event_recursively(data_node):
-    """
-    Recursively searches for a dictionary that looks like the event data.
-    It identifies the event data by checking for the presence of specific
-    keys common to the event structure.
-    """
-    if isinstance(data_node, dict):
-        identifying_keys = {'event_kind', 'id', 'event_description', 'is_online', 'event_place'}
-        if identifying_keys.issubset(data_node.keys()):
-            if (isinstance(data_node.get('id'), str) and
-                isinstance(data_node.get('is_online'), bool) and
-                isinstance(data_node.get('event_description'), dict) and
-                isinstance(data_node.get('event_place'), dict)
-                ):
-                return data_node
+def find_paths(data, key_paths):
+    results = {}
+    target_paths = [tuple(path.split("/")) for path in key_paths]
+    found_paths = set()
 
-        
-        for key, value in data_node.items():
-            found_event = find_event_recursively(value)
-            if found_event:
-                return found_event
-                
-    elif isinstance(data_node, list):
-        for item in data_node:
-            found_event = find_event_recursively(item)
-            if found_event:
-                return found_event
-            
-    return None
+    def search(obj, parents):
+        if len(found_paths) == len(target_paths):
+            return  # All paths found
+
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                current_parents = parents + [key]
+                for path in target_paths:
+                    if path in found_paths:
+                        continue
+                    if len(current_parents) >= 2 and tuple(current_parents[-2:]) == path:
+                        results["/".join(path)] = value
+                        found_paths.add(path)
+                search(value, current_parents)
+
+        elif isinstance(obj, list):
+            for item in obj:
+                search(item, parents)
+
+    search(data, [])
+    return results
+
+def find(json, target_keys):
+    found = {}
+    target_keys_set = set(target_keys)
+
+    def search(obj):
+        if len(found) == len(target_keys_set):
+            return  # Stop if all keys have been found
+
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key in target_keys_set and key not in found:
+                    found[key] = value
+                search(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                search(item)
+
+    search(json)
+    return found
 
 event = get_facebook_event(1144572210449522)
 print()
