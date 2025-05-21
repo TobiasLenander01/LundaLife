@@ -1,5 +1,4 @@
-from scrapers import utils
-import json as json_module
+import utils
 from datetime import datetime
 
 def get_facebook_events(organization):
@@ -21,6 +20,11 @@ def get_facebook_events(organization):
     # Get request
     html = utils.get_html(url)
     
+    # Check if get request succeeded
+    if not html:
+        print(f"GET request for {organization["name"]} failed")
+        return []
+    
     # Get json data from html
     json = utils.html_to_json(html)
     
@@ -29,7 +33,9 @@ def get_facebook_events(organization):
     
     # Add formatted event into list
     for event_id in event_ids:
-        events.append(get_facebook_event(event_id))
+        event = get_facebook_event(event_id)
+        if event:
+            events.append(event)
     
     # Return list of events
     return events
@@ -41,6 +47,11 @@ def get_facebook_event(fbid):
     
     # Get request
     html = utils.get_html(url)
+    
+    # Check if get request succeeded
+    if not html:
+        print(f"GET request for event {fbid} failed")
+        return None
 
     # Get json data from html
     json = utils.html_to_json(html)
@@ -59,12 +70,8 @@ def get_facebook_event(fbid):
         "link": utils.find(json, "event/url")[0]
     }
     
-    # Debug message
-    print(f"Found {formatted_event["organization_name"]} facebook event with id {fbid}: {formatted_event["name"]}")
+    # Console message
+    print(f"Found {formatted_event["organization_name"]} facebook event: {formatted_event["name"]} {formatted_event["link"]}")
     
     # Return the formatted event dictionary
     return formatted_event
-
-# event = get_facebook_event(1144572210449522)
-# print()
-# print(json_module.dumps(event, indent=4, ensure_ascii=False))
