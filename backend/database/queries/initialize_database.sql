@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS events;
 
 CREATE TABLE events (
-    id SERIAL PRIMARY KEY,
-    organization_id INTEGER NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    organization_id BIGINT NOT NULL,
     organization_name TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -16,7 +16,7 @@ CREATE TABLE events (
 
 CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,
-    event_id INTEGER NOT NULL,
+    event_id BIGINT NOT NULL,
     name TEXT,
     price NUMERIC(10, 2),
     active BOOLEAN,

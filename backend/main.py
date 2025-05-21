@@ -1,6 +1,5 @@
 from scrapers import facebook_scraper, stuk_scraper
 from database import database as db
-import json as json_module
 
 ORGANIZATIONS = [
     { "name": "Blekingska Nationen", "address": "Ole römers väg 14D, 22363, Lund", "stuk_org_id": 2635, "fb_org_id": 100064162616790 },
@@ -21,8 +20,9 @@ ORGANIZATIONS = [
 
 def main():
     
-    # Create an empty list to store events
-    events = []
+    # Create empty lists to store events
+    events_stuk = []
+    events_facebook = []
     
     # Loop through each organization
     for organization in ORGANIZATIONS:
@@ -30,38 +30,60 @@ def main():
         print(f"STARTED SCRAPING FACEBOOK EVENTS FOR {organization["name"]}")
         
         # Add facebook events to list
-        events.extend(facebook_scraper.get_facebook_events(organization))
+        events_facebook.extend(facebook_scraper.get_facebook_events(organization))
         
         print(f"STARTED SCRAPING STUK EVENTS FOR {organization["name"]}")
         
         # Add stuk events to list
-        events.extend(stuk_scraper.get_stuk_events(organization))
-        
-    # Write events to a JSON file
-    print("Writing to events.json")
-    with open("events.json", "w", encoding="utf-8") as f:
-        json_module.dump(events, f, ensure_ascii=False, indent=2)
+        events_stuk.extend(stuk_scraper.get_stuk_events(organization))
     
     print() # Empty line
     print("-------------------------")
-    print(f"TOTAL EVENTS SCRAPED: {len(events)}")
+    print(f"EVENTS SCRAPED FROM STUK: {len(events_stuk)}")
+    print(f"EVENTS SCRAPED FROM FACEBOOK: {len(events_facebook)}")
+    print(f"EVENTS SCRAPED TOTAL: {len(events_stuk) + len(events_facebook)}")
+    print("-------------------------")
     
+    print() # Empty line    
+    print("ADDING FACEBOOK EVENTS TO DATABASE")
     
-    # DATABASE INSERTION
-    # print("ADDING EVENTS TO DATABASE")
-    # for event in events:
+    # Loop through facebook  events
+    db_count_facebook = 0
+    for event in events_facebook:
+        # Add event to the database
+        db_event_id = db.upsert_event(event)
         
-    #     # Add event to the database
-    #     db_event_id = db.add_event(event)
+        # If event insertion was successful
+        if db_event_id:
+            db_count_facebook += 1
+            
+    print() # Empty line
+    print("ADDING STUK EVENTS TO DATABASE")
+    
+    # Loop through stuk events
+    db_count_stuk = 0
+    db_count_ticket = 0
+    for event in events_stuk:
+        # Add event to the database
+        db_event_id = db.upsert_event(event)
 
-    #     # If event insertion was successful
-    #     if db_event_id:
-    #         # Add associated tickets to the database
-    #         for ticket_details in event.get("tickets", []):
-    #             db.add_ticket(db_event_id, ticket_details)
-    #     else:
-    #         # If event insertion failed, skip adding tickets
-    #         print(f"Skipping tickets for {event['name']}.")
+        # If event insertion was successful
+        if db_event_id:
+            db_count_stuk += 1
+            
+            # Add associated tickets to the database
+            for ticket_details in event.get("tickets", []):
+                db_count_ticket += 1
+                db.upsert_ticket(db_event_id, ticket_details)
+    
+    print() # Empty line
+    print("-------------------------")
+    print(f"EVENTS PROCESSED BY DB FROM STUK: {db_count_stuk}")
+    print(f"EVENTS PROCESSED BY DB FROM FACEBOOK: {db_count_facebook}")
+    print(f"EVENTS PROCESSED BY DB TOTAL: {db_count_stuk + db_count_facebook}")
+    print(f"TICKETS PROCESSED BY DB TOTAL: {db_count_ticket}")
+    print("-------------------------")
+    print() # Empty line
     
 
 # Entry point for the script

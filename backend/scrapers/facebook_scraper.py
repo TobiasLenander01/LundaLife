@@ -42,9 +42,9 @@ def get_facebook_events(organization):
         start_datetime = datetime.fromtimestamp(start_timestamp, tz=timezone.utc)
         
         # Check if the event has already happened
-        if start_datetime < current_date:
-            print(f"Skipping facebook event with id {fb_event_id} {start_datetime} has already happened.")
-            continue
+        # if start_datetime < current_date:
+        #     print(f"Skipping facebook event with id {fb_event_id} {start_datetime} has already happened.")
+        #     continue
         
         # Get and format event
         event = get_facebook_event(organization, fb_event_id)
@@ -94,6 +94,11 @@ def get_facebook_event(organization, fb_event_id):
     start_date_string_numeric = start_date.strftime("%Y%m%d%H%M")
     event_id = int(f"{organization['stuk_org_id']}{start_date_string_numeric}")
     
+    # Get address
+    address = utils.find(json, "event_place/contextual_name")[0]
+    if not address:
+        address = organization["address"]
+    
     # Format event data in a dictionary
     event = {
         "id": event_id,
@@ -101,7 +106,7 @@ def get_facebook_event(organization, fb_event_id):
         "organization_name": utils.find(json, "entity/short_name")[0],
         "name": utils.find(json, "meta/title")[0],
         "description": utils.find(json, "event_description/text")[0],
-        "address": utils.find(json, "event_place/contextual_name")[0],
+        "address": address,
         "image": utils.find(json, "full_image/uri")[0],
         "start_date": start_date_string,
         "end_date": end_date_string,

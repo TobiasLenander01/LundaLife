@@ -39,13 +39,10 @@ def get_stuk_events(organization):
     for event in json:
         
         # Find occurrences
-        occurrences = utils.find(event, "organization_event_occurrences")
+        occurrences = utils.find(event, "organization_event_occurrences")[0]
         
         # Loop through each occurrence
         for occurrence in occurrences:
-            
-            # Get dict from occurrence list
-            occurrence = occurrence[0]
             
             # Get the current date 
             current_date = datetime.now(timezone.utc)
@@ -97,6 +94,11 @@ def format_stuk_event(organization, event, occurrence):
     start_date_string_numeric = start_date.strftime("%Y%m%d%H%M")
     event_id = int(f"{organization['stuk_org_id']}{start_date_string_numeric}")
     
+    # Get address
+    address = occurrence["address"]
+    if not address:
+        address = organization["address"]
+    
     # Create a formatted event
     formatted_event = {
         "id": event_id,
@@ -104,7 +106,7 @@ def format_stuk_event(organization, event, occurrence):
         "organization_name": occurrence["organization_event"]["organization"]["name"],
         "name": occurrence["organization_event"]["title"],
         "description": BeautifulSoup(occurrence["organization_event"]["content"], "html.parser").get_text(),
-        "address": occurrence["address"] or organization["address"],
+        "address": address,
         "image": event["image_url"],
         "start_date": start_date_string,
         "end_date": end_date_string,
