@@ -2,6 +2,8 @@ import requests
 import json as json_module
 from bs4 import BeautifulSoup
 
+TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+
 def html_to_json(html):
     # Format respone html text with beautiful soup
     soup = BeautifulSoup(html, 'html.parser')

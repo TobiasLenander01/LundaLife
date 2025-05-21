@@ -1,131 +1,139 @@
 import requests
 from bs4 import BeautifulSoup
-import datetime
+import utils
+import json as json_module
+from datetime import datetime, timezone
 
-def get_stuk_events(organizations):
-    '''
-    Fetches events from STUK API and formats them for database insertion.
-    '''
+def get_stuk_events(organization):
+    
+    # Get stuk_org_id
+    stuk_org_id = organization["stuk_org_id"]
+    
+    # Check if organization has a stuk_org_id
+    if stuk_org_id is None:
+        print(f"{organization.get("name")} has no stuk_org_id, skipping.")
+        return []
     
     # Create an empty list to store formatted events
-    formatted_events = []
+    events = []
     
-    # Loop through each organization
-    for organization in organizations:
+    # Define URL for the stuk organization events
+    url = f"https://api.studentkortet.se/organization/{organization['stuk_org_id']}/organization-events"
+    
+    # Console log
+    print(f"Found stuk url for {organization["name"]}: {url}")
+    
+    # Get request
+    response = requests.get(url)
+    
+    # Check if the request was successful
+    if response.status_code != 200:
+        # Print error message
+        print(f"Stuk GET request for {organization["name"]} failed")
+        return None
+    
+    # Convert the response data to json
+    json = response.json()
+    
+    # Loop through each event in the raw json data
+    for event in json:
         
-        # Check if organization has a stuk_id
-        if organization.get("stuk_id") is None:
-            print(f"{organization.get("name")} has no stuk_id, skipping.")
-            continue
+        # Find occurrences
+        occurrences = utils.find(event, "organization_event_occurrences")
         
-        # Define the URL for the STUK API
-        URL = f"https://api.studentkortet.se/organization/{organization['stuk_id']}/organization-events"
-        
-        # Make a GET request
-        response = requests.get(URL)
-        
-        # Check if the request was successful
-        if response.status_code != 200:
-            # Print error message
-            print(f"Failed to fetch data for {organization['name']}, status code {response.status_code}")
-            return None
-        
-        # Save the response data as JSON
-        print(f"Request successful, status code {response.status_code}")
-        event_data = response.json()
-
-        # Check if there is event data
-        if event_data is None:
-            print(f"No event data was given")
-            return []
-
-        # Loop through each event in the event data
-        for event in event_data:
-            print("Fetching: " + event.get("title"))
+        # Loop through each occurrence
+        for occurrence in occurrences:
             
-            # Get event details
-            event_title = event.get("title")
-            event_description = event.get("content")
-
-            # Get each event occurrence
-            occurrences = event.get("organization_event_occurrences", [])
-
-            # Loop through each occurrence
-            for occurrence in occurrences:
+            # Get dict from occurrence list
+            occurrence = occurrence[0]
+            
+            # Get the current date 
+            current_date = datetime.now(timezone.utc)
+            
+            # Get occurrence date
+            event_date = datetime.strptime(utils.find(occurrence, "start_date")[0], utils.TIME_FORMAT)
+            event_date = event_date.replace(tzinfo=timezone.utc)
+            
+            # Check if the event has already happened
+            if event_date < current_date:
+                print(f"Skipping {utils.find(occurrence, "organization_event/title")[0]} {event_date}, has already happened.")
+                continue
+            
+            # Format the occurrence as an event
+            formatted_event = format_stuk_event(organization, event, occurrence)
+            
+            # If an event was successfully formatted
+            if formatted_event:
+                # Add event to list
+                events.append(formatted_event)
                 
-                # Create an empty list to store formatted tickets
-                formatted_tickets = []
+                # Console log
+                print(f"Retrieved {formatted_event["name"]} from stuk")
+    
+    # Console log
+    print(f"Formatted {len(events)} {organization["name"]} events from stuk")
+    
+    # Return list of events
+    return events
 
-                # Get ticket data from the occurrence
-                ticket_data = occurrence.get("tickets", [])
+def format_stuk_event(organization, event, occurrence):
+        
+    # Create a bouncer link for the event
+    bouncer_link = f"https://ob.addreax.com/{organization['stuk_org_id']}/events/{event["id"]}/occur/{occurrence["id"]}"
+    
+    # Format time
+    start_date = datetime.strptime(occurrence["start_date"], utils.TIME_FORMAT)
+    start_date = start_date.replace(tzinfo=timezone.utc)
+    start_datestring = str(start_date)
+    end_date = datetime.strptime(occurrence["end_date"], utils.TIME_FORMAT)
+    end_date = end_date.replace(tzinfo=timezone.utc)
+    end_datestring = str(end_date)
+    
+    # Create a formatted event
+    event = {
+        "id": f"{organization['stuk_org_id']}{event["id"]}{occurrence["id"]}",
+        "organization_id": organization["stuk_org_id"],
+        "organization_name": occurrence["organization_event"]["organization"]["name"],
+        "name": occurrence["organization_event"]["title"],
+        "description": BeautifulSoup(occurrence["organization_event"]["content"], "html.parser").get_text(),
+        "address": occurrence["address"] or organization["address"],
+        "image": event["image_url"],
+        "start_date": start_datestring,
+        "end_date": end_datestring,
+        "link": bouncer_link
+    }
+    
+    # Return the formatted event
+    return event
+    
+def get_stuk_tickets(event):
+    # Create an empty list to store formatted tickets
+    tickets = []
 
-                # Check if there are tickets available
-                if ticket_data:
-                    print("Tickets found for event: " + event_title)
-                    
-                    # Loop through each ticket
-                    for ticket in ticket_data:
-                        
-                        # Remove trailing zeros
-                        if ticket.get("price") is not None:
-                            price = ticket.get("price") / 100
-                        
-                        # Format the ticket data
-                        formatted_ticket = {
-                            "name": ticket.get("name"),
-                            "ticket_count": ticket.get("count"),
-                            "price": price,
-                            "active": ticket.get("is_active"),
-                            "max_count_per_person": ticket.get("max_count_per_member")
-                        }
+    # Get ticket data from the occurrence
+    ticket_data = event.get("tickets", [])
 
-                        # Add the formatted ticket to the list
-                        formatted_tickets.append(formatted_ticket)
-                else:
-                    print("No tickets found for event: " + event_title)
+    # Check if there are tickets available
+    if ticket_data:
+        print(f"Tickets found for stuk event: {event["name"]}")
+        
+        # Loop through each ticket
+        for ticket in ticket_data:
+            
+            # Remove trailing zeros
+            if ticket.get("price") is not None:
+                price = ticket.get("price") / 100
+            
+            # Format the ticket data
+            formatted_ticket = {
+                "name": ticket.get("name"),
+                "ticket_count": ticket.get("count"),
+                "price": price,
+                "active": ticket.get("is_active"),
+                "max_count_per_person": ticket.get("max_count_per_member")
+            }
 
-                # Create a bouncer link for the event
-                bouncer_link = f"https://ob.addreax.com/{organization['stuk_id']}/events/{occurrence.get('organization_event_id')}/occur/{occurrence.get('id')}"
-                
-                # Combine IDs
-                event_id = occurrence.get("organization_event_id")
-                occurrence_id = occurrence.get("id")
-                combined_id = f"{event_id}{occurrence_id}"
-                
-                # Check if there is an address in the event
-                address = occurrence.get("address")
-                if not address:
-                    # If no address, use the organization's address
-                    address = organization['address']
-
-                # Create a formatted event dictionary
-                formatted_event = {
-                    "id": combined_id,
-                    "organization_id": organization['stuk_id'],
-                    "organization_name": organization['name'],
-                    "name": event_title,
-                    "description": BeautifulSoup(event_description, "html.parser").get_text(),
-                    "address": address,
-                    "image": event.get("image_url"),
-                    "start_date": occurrence.get("start_date"),
-                    "end_date": occurrence.get("end_date"),
-                    "link": bouncer_link,
-                    "tickets": formatted_tickets
-                }
-                
-                # Get the current date and time
-                current_datetime = datetime.datetime.now()
-                event_start_datetime = datetime.datetime.strptime(occurrence.get("start_date"), "%Y-%m-%dT%H:%M:%S.%fZ")
-                
-                # Check if the event has already happened
-                if event_start_datetime < current_datetime:
-                    print(f"Skipping {event_title}, has already happened.")
-                    continue
-                
-                # Add the formatted event to the list
-                print("Adding event to list: " + event_title)
-                formatted_events.append(formatted_event)
-                
-    # Return the list of formatted events
-    print(f"Returning {len(formatted_events)} events from STUK API")
-    return formatted_events
+            # Add the formatted ticket to the list
+            tickets.append(formatted_ticket)
+    else:
+        print(f"No tickets found for event: {event["name"]}")
