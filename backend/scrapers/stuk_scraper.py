@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import utils
-import json as json_module
 from datetime import datetime, timezone
+import pytz
 
 def get_stuk_events(organization):
     
@@ -81,27 +81,33 @@ def format_stuk_event(organization, event, occurrence):
     # Create a bouncer link for the event
     bouncer_link = f"https://ob.addreax.com/{organization['stuk_org_id']}/events/{event["id"]}/occur/{occurrence["id"]}"
     
-    # Format time
+    # Get timezone
+    stockholm = pytz.timezone("Europe/Stockholm")
+
+    # Parse string as local Stockholm time
     start_date = datetime.strptime(occurrence["start_date"], utils.TIME_FORMAT)
-    start_date = start_date.replace(tzinfo=timezone.utc)
-    start_datestring = str(start_date)
+    start_date = stockholm.localize(start_date)
+    start_date_string = start_date.strftime("%Y-%m-%d %H:%M")
+
     end_date = datetime.strptime(occurrence["end_date"], utils.TIME_FORMAT)
-    end_date = end_date.replace(tzinfo=timezone.utc)
-    end_datestring = str(end_date)
-    
-    print(f"STUK START DATE: {start_datestring}") # 2025-06-06 17:00:00+00:00
+    end_date = stockholm.localize(end_date)
+    end_date_string = end_date.strftime("%Y-%m-%d %H:%M")
+
+    # Format event_id
+    start_date_string_numeric = start_date.strftime("%Y%m%d%H%M")
+    event_id = int(f"{organization['stuk_org_id']}{start_date_string_numeric}")
     
     # Create a formatted event
     formatted_event = {
-        "id": f"{organization['stuk_org_id']}{event["id"]}{occurrence["id"]}",
+        "id": event_id,
         "organization_id": organization["stuk_org_id"],
         "organization_name": occurrence["organization_event"]["organization"]["name"],
         "name": occurrence["organization_event"]["title"],
         "description": BeautifulSoup(occurrence["organization_event"]["content"], "html.parser").get_text(),
         "address": occurrence["address"] or organization["address"],
         "image": event["image_url"],
-        "start_date": start_datestring,
-        "end_date": end_datestring,
+        "start_date": start_date_string,
+        "end_date": end_date_string,
         "link": bouncer_link
     }
     

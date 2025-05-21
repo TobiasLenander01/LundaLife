@@ -1,6 +1,6 @@
 import utils
 from datetime import datetime, timezone
-import json as json_module
+import pytz
 
 def get_facebook_events(organization):
     
@@ -29,9 +29,6 @@ def get_facebook_events(organization):
     # Get json data from html
     json = utils.html_to_json(html)
     
-    with open("facebook_event.json", "w", encoding="utf-8") as f:
-        json_module.dump(json, f, ensure_ascii=False, indent=2)
-    
     # Find event ids
     event_ids = utils.find(json, "node/node/id")
     
@@ -50,7 +47,7 @@ def get_facebook_events(organization):
             continue
         
         # Get and format event
-        event = get_facebook_event(fb_event_id)
+        event = get_facebook_event(organization, fb_event_id)
         
         # If an event was successfully formatted
         if event:
@@ -63,7 +60,7 @@ def get_facebook_events(organization):
     # Return list of events
     return events
 
-def get_facebook_event(fb_event_id):
+def get_facebook_event(organization, fb_event_id):
     
     # Define URL for the facebook event
     url = f"https://www.facebook.com/events/{fb_event_id}"
@@ -79,27 +76,35 @@ def get_facebook_event(fb_event_id):
     # Get json data from html
     json = utils.html_to_json(html)
     
-    # Format time
+    # Get timezone
+    stockholm = pytz.timezone("Europe/Stockholm")
+
+    # Convert from UTC timestamp → Stockholm time
     start_timestamp = utils.find(json, "data/start_timestamp")[0]
-    start_datetime = datetime.fromtimestamp(start_timestamp, tz=timezone.utc)
-    start_datestring = start_datetime.strftime(utils.TIME_FORMAT) + "Z"
+    start_date_utc = datetime.fromtimestamp(start_timestamp, tz=timezone.utc)
+    start_date = start_date_utc.astimezone(stockholm)
+    start_date_string = start_date.strftime("%Y-%m-%d %H:%M")
+
     end_timestamp = utils.find(json, "data/end_timestamp")[0]
-    end_datetime = datetime.fromtimestamp(end_timestamp, tz=timezone.utc)
-    end_datestring = end_datetime.strftime(utils.TIME_FORMAT) + "Z"
-    
-    print(f"FACEBOOK START DATE: {start_datestring}")
+    end_date_utc = datetime.fromtimestamp(end_timestamp, tz=timezone.utc)
+    end_date = end_date_utc.astimezone(stockholm)
+    end_date_string = end_date.strftime("%Y-%m-%d %H:%M")
+
+    # Format event_id
+    start_date_string_numeric = start_date.strftime("%Y%m%d%H%M")
+    event_id = int(f"{organization['stuk_org_id']}{start_date_string_numeric}")
     
     # Format event data in a dictionary
     event = {
-        "id": utils.find(json, "params/event_id")[0],
-        "organization_id": utils.find(json, "entity/id")[0],
+        "id": event_id,
+        "organization_id": organization["fb_org_id"],
         "organization_name": utils.find(json, "entity/short_name")[0],
         "name": utils.find(json, "meta/title")[0],
         "description": utils.find(json, "event_description/text")[0],
         "address": utils.find(json, "event_place/contextual_name")[0],
         "image": utils.find(json, "full_image/uri")[0],
-        "start_date": start_datestring,
-        "end_date": end_datestring,
+        "start_date": start_date_string,
+        "end_date": end_date_string,
         "link": utils.find(json, "event/url")[0]
     }
     

@@ -1,6 +1,6 @@
 from scrapers import facebook_scraper, stuk_scraper
 from database import database as db
-import json
+import json as json_module
 
 ORGANIZATIONS = [
     { "name": "Blekingska Nationen", "address": "Ole römers väg 14D, 22363, Lund", "stuk_org_id": 2635, "fb_org_id": 100064162616790 },
@@ -38,8 +38,9 @@ def main():
         events.extend(stuk_scraper.get_stuk_events(organization))
         
     # Write events to a JSON file
+    print("Writing to events.json")
     with open("events.json", "w", encoding="utf-8") as f:
-        json.dump(events, f, ensure_ascii=False, indent=2)
+        json_module.dump(events, f, ensure_ascii=False, indent=2)
     
     print() # Empty line
     print("-------------------------")
