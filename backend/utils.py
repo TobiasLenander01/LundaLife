@@ -2,6 +2,21 @@ import requests
 import json as json_module
 from bs4 import BeautifulSoup
 
+# Define headers to mimic a real browser
+BROWSER_HEADERS = {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "accept-encoding": "gzip, deflate",
+    "accept-language": "en-US,en;q=0.6",
+    "cache-control": "max-age=0",
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "same-origin",
+    "sec-fetch-user": "?1",
+    "sec-gpc": "1",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+}
+
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 def html_to_json(html):
@@ -40,7 +55,7 @@ def html_to_json(html):
     
     return json
 
-def find(data, key_path):
+def json_search(data, key_path):
     # Split the key_path string into a list of keys
     target_path = key_path.split("/")
     
@@ -67,25 +82,9 @@ def find(data, key_path):
     return results
 
 def get_html(url):
-    
-    # Define headers to mimic a real browser
-    headers = {
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-        "accept-encoding": "gzip, deflate",
-        "accept-language": "en-US,en;q=0.6",
-        "cache-control": "max-age=0",
-        "sec-fetch-dest": "document",
-        "sec-fetch-mode": "navigate",
-        "sec-fetch-site": "same-origin",
-        "sec-fetch-user": "?1",
-        "sec-gpc": "1",
-        "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
-    }
-    
     # Try a GET request
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=BROWSER_HEADERS)
         response.raise_for_status()
         html = response.text
     except requests.RequestException as error:
@@ -93,3 +92,11 @@ def get_html(url):
         return None
     
     return html
+
+def load_html(file_path=r"C:\Users\tobia\Downloads\facebook_events_lund.html"):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            return file.read()
+    except (OSError, IOError) as error:
+        print(error)
+        return None

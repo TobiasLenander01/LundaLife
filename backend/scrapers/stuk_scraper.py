@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import pytz
 
 def get_stuk_events(organization):
+    print(f"RETRIEVING STUK EVENTS FROM {organization["name"]}")
     
     # Get stuk_org_id
     stuk_org_id = organization["stuk_org_id"]
@@ -39,7 +40,7 @@ def get_stuk_events(organization):
     for event in json:
         
         # Find occurrences
-        occurrences = utils.find(event, "organization_event_occurrences")[0]
+        occurrences = utils.json_search(event, "organization_event_occurrences")[0]
         
         # Loop through each occurrence
         for occurrence in occurrences:
@@ -48,12 +49,12 @@ def get_stuk_events(organization):
             current_date = datetime.now(timezone.utc)
             
             # Get occurrence date
-            event_date = datetime.strptime(utils.find(occurrence, "start_date")[0], utils.TIME_FORMAT)
+            event_date = datetime.strptime(utils.json_search(occurrence, "start_date")[0], utils.TIME_FORMAT)
             event_date = event_date.replace(tzinfo=timezone.utc)
             
             # Check if the event has already happened
             if event_date < current_date:
-                print(f"Skipping stuk event {utils.find(occurrence, "organization_event/title")[0]} {event_date}, has already happened.")
+                print(f"Skipping stuk event {utils.json_search(occurrence, "organization_event/title")[0]} {event_date}, has already happened.")
                 continue
             
             # Format the occurrence as an event
