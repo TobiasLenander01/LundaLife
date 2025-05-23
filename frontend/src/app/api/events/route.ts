@@ -4,21 +4,11 @@ import db from '@/lib/db';
 export async function GET() {
   try {
     const result = await db.query(`
-      SELECT
-        id,
-        organization_id,
-        organization_name,
-        name,
-        description,
-        address,
-        latitude,
-        longitude,
-        image,
-        link,
-        start_date,
-        end_date
+      SELECT *
       FROM events
-      ORDER BY start_date DESC
+      JOIN organizations ON events.organization_id = organizations.id
+      WHERE events.start_date >= NOW()
+      ORDER BY events.start_date DESC
     `);
 
     return NextResponse.json(result.rows);

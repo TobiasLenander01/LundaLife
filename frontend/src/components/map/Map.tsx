@@ -6,10 +6,10 @@ import mapStyle from '@/lib/map/mapStyle.json';
 import { Event } from '@/types/db';
 
 interface MapProps {
-    events?: Event[];
+    events?: Event[]; // events is already optional from your page.tsx logic
 }
 
-const Map = ({ events = [] }: MapProps) => {
+const MapComponent = ({ events = [] }: MapProps) => { // Renamed to MapComponent to avoid conflict if you export default Map
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
     });
@@ -17,8 +17,11 @@ const Map = ({ events = [] }: MapProps) => {
     // Lund, Sweden coordinates
     const center = useMemo(() => ({ lat: 55.7047, lng: 13.1910 }), []);
 
-    if (loadError) return <div>Failed to load maps</div>;
-    if (!isLoaded) return <div>Loading...</div>;
+    if (loadError) {
+        console.error("Google Maps API load error:", loadError);
+        return <div>Failed to load maps. Check the console for details.</div>;
+    }
+    if (!isLoaded) return <div>Loading Google Maps...</div>;
 
     return (
         <div className="w-screen h-screen bg-black">
@@ -41,14 +44,20 @@ const Map = ({ events = [] }: MapProps) => {
                     <Marker
                         key={event.id}
                         position={{
-                            lat: event.latitude,
-                            lng: event.longitude,
+                            // Ensure latitude and longitude are not null.
+                            // Your Event type allows them to be null, which could be an issue.
+                            // You might want to filter out events without lat/lng before passing to Map
+                            // or handle it here. For now, assuming they are present.
+                            lat: event.latitude!,
+                            lng: event.longitude!,
                         }}
-                        label={event.organization_name.charAt(0).toUpperCase()} // First letter of org
-                        title={`${event.name} by ${event.organization_name}`}
+                        // Corrected access to organization name
+                        label={event.organization.name.charAt(0).toUpperCase()}
+                        title={`${event.name} by ${event.organization.name}`}
                         onClick={() => {
                             console.log(`Clicked on event: ${event.name} (ID: ${event.id})`);
-                            alert(`Event: ${event.name}\nAddress: ${event.address}`);
+                            // You might want a more sophisticated info window or modal here
+                            alert(`Event: ${event.name}\nOrganization: ${event.organization.name}\nAddress: ${event.address || 'N/A'}`);
                         }}
                     />
                 ))}
@@ -57,4 +66,4 @@ const Map = ({ events = [] }: MapProps) => {
     );
 };
 
-export default Map;
+export default MapComponent; // Or export default Map; if you rename the const
