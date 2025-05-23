@@ -9,7 +9,7 @@ interface MapProps {
     events?: Event[];
 }
 
-const Map = ({ events = [] }: MapProps) => {
+export default function Map ({ events = [] }: MapProps) {
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
     });
@@ -17,8 +17,11 @@ const Map = ({ events = [] }: MapProps) => {
     // Lund, Sweden coordinates
     const center = useMemo(() => ({ lat: 55.7047, lng: 13.1910 }), []);
 
-    if (loadError) return <div>Failed to load maps</div>;
-    if (!isLoaded) return <div>Loading...</div>;
+    if (loadError) {
+        console.error("Google Maps API load error:", loadError);
+        return <div>Failed to load maps. Check the console for details.</div>;
+    }
+    if (!isLoaded) return <div>Loading Google Maps...</div>;
 
     return (
         <div className="w-screen h-screen bg-black">
@@ -41,14 +44,15 @@ const Map = ({ events = [] }: MapProps) => {
                     <Marker
                         key={event.id}
                         position={{
-                            lat: event.latitude,
-                            lng: event.longitude,
+                            // TODO: Ensure latitude and longitude are not null.
+                            lat: event.latitude!,
+                            lng: event.longitude!,
                         }}
-                        label={event.organization_name.charAt(0).toUpperCase()} // First letter of org
-                        title={`${event.name} by ${event.organization_name}`}
+                        label={event.organization.name.charAt(0).toUpperCase()}
+                        title={`${event.name} by ${event.organization.name}`}
                         onClick={() => {
                             console.log(`Clicked on event: ${event.name} (ID: ${event.id})`);
-                            alert(`Event: ${event.name}\nAddress: ${event.address}`);
+                            alert(`Event: ${event.name}\nOrganization: ${event.organization.name}\nAddress: ${event.address || 'N/A'}`);
                         }}
                     />
                 ))}
@@ -56,5 +60,3 @@ const Map = ({ events = [] }: MapProps) => {
         </div>
     );
 };
-
-export default Map;

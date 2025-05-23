@@ -7,13 +7,13 @@ def get_facebook_events(organization):
     # Create an empty list to store events
     events = []
     
-    # Check if organization has a fb_org_id
-    if not organization.get("fb_org_id"):
-        print(f"No fb_org_id found for {organization["name"]}")
+    # Check if organization has a fb_id
+    if not organization.get("fb_id"):
+        print(f"No fb_id found for {organization["name"]}")
         return []
     
     # Define URL for the facebook organization events
-    url = f"https://www.facebook.com/{organization["fb_org_id"]}/events"
+    url = f"https://www.facebook.com/{organization["fb_id"]}/events"
     
     # Console log
     print(f"Found facebook url for {organization["name"]}: {url}")
@@ -89,10 +89,6 @@ def get_facebook_event(organization, fb_event_id):
     end_date_utc = datetime.fromtimestamp(end_timestamp, tz=timezone.utc)
     end_date = end_date_utc.astimezone(stockholm)
     end_date_string = end_date.strftime("%Y-%m-%d %H:%M")
-
-    # Format event_id
-    start_date_string_numeric = start_date.strftime("%Y%m%d%H%M")
-    event_id = int(f"{organization['stuk_org_id']}{start_date_string_numeric}")
     
     # Get address
     address = utils.find(json, "event_place/contextual_name")[0]
@@ -101,8 +97,7 @@ def get_facebook_event(organization, fb_event_id):
     
     # Format event data in a dictionary
     event = {
-        "id": event_id,
-        "organization_id": organization["fb_org_id"],
+        "organization_id": organization["id"],
         "organization_name": utils.find(json, "entity/short_name")[0],
         "name": utils.find(json, "meta/title")[0],
         "description": utils.find(json, "event_description/text")[0],
