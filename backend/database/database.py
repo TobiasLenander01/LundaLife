@@ -51,7 +51,6 @@ def upsert_event(event):
         cursor.execute(UPSERT_EVENT_QUERY, (
             event["id"],
             event["organization_id"],
-            event["organization_name"],
             event["name"],
             event["description"],
             event["address"],
@@ -112,7 +111,7 @@ def upsert_ticket(db_event_id, ticket):
             ticket.get("name"),
             ticket.get("price"),
             ticket.get("active"),
-            ticket.get("ticket_count"),
+            ticket.get("count"),
             ticket.get("max_count_per_person")
         ))
 

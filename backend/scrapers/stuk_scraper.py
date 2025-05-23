@@ -148,7 +148,7 @@ def get_stuk_tickets(occurrence):
         # Format the ticket data
         formatted_ticket = {
             "name": ticket["name"],
-            "ticket_count": ticket["count"],
+            "count": ticket["count"],
             "price": price,
             "active": ticket.get("is_active"),
             "max_count_per_person": ticket.get("max_count_per_member")
