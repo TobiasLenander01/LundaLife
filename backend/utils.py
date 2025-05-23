@@ -1,6 +1,15 @@
 import requests
 import json as json_module
 from bs4 import BeautifulSoup
+from urllib.parse import quote
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Database connection URL
+GEOCODE_API_KEY = os.getenv("GEOCODE_API_KEY")
+
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
@@ -93,3 +102,20 @@ def get_html(url):
         return None
     
     return html
+
+
+def address_to_coordinates(address, GEOCODE_API_KEY=GEOCODE_API_KEY):
+    base_url = f"https://maps.googleapis.com/maps/api/geocode/json"
+
+    encoded_address = quote(address)
+
+    url = f"{base_url}?address={encoded_address}&key={GEOCODE_API_KEY}"
+    response = requests.get(url)
+
+    response_json = response.json()
+
+    latitude = find(response_json, "location/lat")[0]
+    longitude = find(response_json, "location/lng")[0]
+
+    return (latitude, longitude)
+    
