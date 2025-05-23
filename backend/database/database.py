@@ -30,6 +30,8 @@ def __load_query(query_name):
 # Load queries once when module is imported
 UPSERT_EVENT_QUERY = __load_query("upsert_event")
 UPSERT_TICKET_QUERY = __load_query("upsert_ticket")
+UPSERT_ORGANIZATION_QUERY = __load_query("upsert_organization")
+GET_ORGANIZATIONS_QUERY = __load_query("get_organizations")
 
 def upsert_event(event):
     """
@@ -49,7 +51,6 @@ def upsert_event(event):
         
         # Execute the query with the event details
         cursor.execute(UPSERT_EVENT_QUERY, (
-            event["id"],
             event["organization_id"],
             event["name"],
             event["description"],
@@ -130,6 +131,83 @@ def upsert_ticket(db_event_id, ticket):
             conn.rollback()
     finally:
         # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+            
+def upsert_organization(organization):
+    """
+    Adds or updates an organization in the database and returns its primary key (id).
+    Returns None if operation fails.
+    """
+    conn = None
+    cursor = None
+    db_org_id = None
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        cursor.execute(UPSERT_ORGANIZATION_QUERY, (
+            organization["name"],
+            organization["address"],
+            organization["latitude"],
+            organization["longitude"],
+            organization.get("stuk_id"),
+            organization.get("fb_id")
+        ))
+
+        db_org_id = cursor.fetchone()[0]
+        conn.commit()
+
+        print(f"DATABASE Processed organization: '{organization['name']}' with DB ID: {db_org_id}")
+        return db_org_id
+
+    except Exception as e:
+        print(f"DATABASE Error processing organization: {e}")
+        if conn:
+            conn.rollback()
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+            
+def get_all_organizations():
+    """
+    Returns a list of all organizations from the database.
+    """
+    conn = None
+    cursor = None
+    organizations = []
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        cursor.execute(GET_ORGANIZATIONS_QUERY)
+        rows = cursor.fetchall()
+
+        for row in rows:
+            org = {
+                "id": row[0],
+                "name": row[1],
+                "address": row[2],
+                "latitude": row[3],
+                "longitude": row[4],
+                "stuk_id": row[5],
+                "fb_id": row[6]
+            }
+            organizations.append(org)
+
+        return organizations
+
+    except Exception as e:
+        print(f"DATABASE Error fetching organizations: {e}")
+        return []
+    finally:
         if cursor:
             cursor.close()
         if conn:

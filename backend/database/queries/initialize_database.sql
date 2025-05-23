@@ -1,24 +1,17 @@
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS organizations;
-DROP TYPE IF EXISTS organization_type;
 
--- Recreate enum type
-CREATE TYPE organization_type AS ENUM ('facebook', 'stuk');
-
--- Create organizations table
 CREATE TABLE organizations (
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT UNIQUE NOT NULL,
     address TEXT NOT NULL,
     latitude DOUBLE PRECISION NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
     stuk_id BIGINT,
-    fb_id BIGINT,
-    type organization_type NOT NULL
+    fb_id BIGINT
 );
 
--- Create events table with foreign key to organizations
 CREATE TABLE events (
     id SERIAL PRIMARY KEY,
     organization_id BIGINT NOT NULL,
@@ -32,10 +25,10 @@ CREATE TABLE events (
     start_date TIMESTAMPTZ NOT NULL,
     end_date TIMESTAMPTZ,
 
-    CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+    CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+    CONSTRAINT unique_event_org_start UNIQUE (organization_id, start_date)
 );
 
--- Create tickets table with foreign key to events
 CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,
     event_id BIGINT NOT NULL,

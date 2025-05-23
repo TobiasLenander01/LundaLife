@@ -6,19 +6,19 @@ import pytz
 
 def get_stuk_events(organization):
     
-    # Get stuk_org_id
-    stuk_org_id = organization["stuk_org_id"]
+    # Get stuk_id
+    stuk_id = organization["stuk_id"]
     
-    # Check if organization has a stuk_org_id
-    if stuk_org_id is None:
-        print(f"{organization.get("name")} has no stuk_org_id, skipping.")
+    # Check if organization has a stuk_id
+    if stuk_id is None:
+        print(f"{organization.get("name")} has no stuk_id, skipping.")
         return []
     
     # Create an empty list to store formatted events
     events = []
     
     # Define URL for the stuk organization events
-    url = f"https://api.studentkortet.se/organization/{organization['stuk_org_id']}/organization-events"
+    url = f"https://api.studentkortet.se/organization/{organization['stuk_id']}/organization-events"
     
     # Console log
     print(f"Found stuk url for {organization["name"]}: {url}")
@@ -76,7 +76,7 @@ def get_stuk_events(organization):
 def format_stuk_event(organization, event, occurrence):
         
     # Create a bouncer link for the event
-    bouncer_link = f"https://ob.addreax.com/{organization['stuk_org_id']}/events/{event["id"]}/occur/{occurrence["id"]}"
+    bouncer_link = f"https://ob.addreax.com/{organization['stuk_id']}/events/{event["id"]}/occur/{occurrence["id"]}"
     
     # Get timezone
     stockholm = pytz.timezone("Europe/Stockholm")
@@ -89,10 +89,6 @@ def format_stuk_event(organization, event, occurrence):
     end_date = datetime.strptime(occurrence["end_date"], utils.TIME_FORMAT)
     end_date = stockholm.localize(end_date)
     end_date_string = end_date.strftime("%Y-%m-%d %H:%M")
-
-    # Format event_id
-    start_date_string_numeric = start_date.strftime("%Y%m%d%H%M")
-    event_id = int(f"{organization['stuk_org_id']}{start_date_string_numeric}")
     
     # Get address
     address = occurrence["address"]
@@ -104,8 +100,7 @@ def format_stuk_event(organization, event, occurrence):
     
     # Create a formatted event
     formatted_event = {
-        "id": event_id,
-        "organization_id": organization["stuk_org_id"],
+        "organization_id": organization["id"],
         "organization_name": occurrence["organization_event"]["organization"]["name"],
         "name": occurrence["organization_event"]["title"],
         "description": BeautifulSoup(occurrence["organization_event"]["content"], "html.parser").get_text(),

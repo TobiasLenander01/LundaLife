@@ -5,12 +5,13 @@ from urllib.parse import quote
 import os
 from dotenv import load_dotenv
 
+# Load environment variables from .env
 load_dotenv()
 
 # Database connection URL
 GEOCODE_API_KEY = os.getenv("GEOCODE_API_KEY")
 
-
+# Define a common time format
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 def html_to_json(html):
