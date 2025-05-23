@@ -1,10 +1,15 @@
 'use client';
 
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
 import { useMemo } from 'react';
 import mapStyle from '@/lib/map/mapStyle.json';
+import { Event } from '@/types/db';
 
-const Map = () => {
+interface MapProps {
+    events?: Event[];
+}
+
+const Map = ({ events = [] }: MapProps) => {
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
     });
@@ -32,6 +37,21 @@ const Map = () => {
                     gestureHandling: 'greedy',
                 }}
             >
+                {events.map((event: Event) => (
+                    <Marker
+                        key={event.id}
+                        position={{
+                            lat: event.latitude,
+                            lng: event.longitude,
+                        }}
+                        label={event.organization_name.charAt(0).toUpperCase()} // First letter of org
+                        title={`${event.name} by ${event.organization_name}`}
+                        onClick={() => {
+                            console.log(`Clicked on event: ${event.name} (ID: ${event.id})`);
+                            alert(`Event: ${event.name}\nAddress: ${event.address}`);
+                        }}
+                    />
+                ))}
             </GoogleMap>
         </div>
     );

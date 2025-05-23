@@ -11,12 +11,14 @@ export async function GET() {
         name,
         description,
         address,
+        latitude,
+        longitude,
         image,
         link,
         start_date,
         end_date
       FROM events
-      ORDER BY events.start_date DESC
+      ORDER BY start_date DESC
     `);
 
     return NextResponse.json(result.rows);

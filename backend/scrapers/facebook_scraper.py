@@ -1,6 +1,7 @@
 import utils
 from datetime import datetime, timezone
 import pytz
+import json as pyjson
 
 def get_facebook_events(organization):
     
@@ -98,6 +99,12 @@ def get_facebook_event(organization, fb_event_id):
     address = utils.find(json, "event_place/contextual_name")[0]
     if not address:
         address = organization["address"]
+        
+    # Get coordinates
+    coordinates = (
+        utils.find(json, "location/latitude")[0],
+        utils.find(json, "location/longitude")[0]
+    )
     
     # Format event data in a dictionary
     event = {
@@ -107,6 +114,7 @@ def get_facebook_event(organization, fb_event_id):
         "name": utils.find(json, "meta/title")[0],
         "description": utils.find(json, "event_description/text")[0],
         "address": address,
+        "coordinates": coordinates,
         "image": utils.find(json, "full_image/uri")[0],
         "start_date": start_date_string,
         "end_date": end_date_string,
