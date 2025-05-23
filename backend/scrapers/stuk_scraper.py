@@ -98,6 +98,9 @@ def format_stuk_event(organization, event, occurrence):
     address = occurrence["address"]
     if not address:
         address = organization["address"]
+        
+    # Get coordinates
+    (latitude, longitude) = utils.address_to_coordinates(address)
     
     # Create a formatted event
     formatted_event = {
@@ -107,8 +110,8 @@ def format_stuk_event(organization, event, occurrence):
         "name": occurrence["organization_event"]["title"],
         "description": BeautifulSoup(occurrence["organization_event"]["content"], "html.parser").get_text(),
         "address": address,
-        "latitude": None,
-        "longitude": None,
+        "latitude": latitude,
+        "longitude": longitude,
         "image": event["image_url"],
         "start_date": start_date_string,
         "end_date": end_date_string,

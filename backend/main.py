@@ -32,10 +32,10 @@ def main():
         # Add facebook events to list
         events_facebook.extend(facebook_scraper.get_facebook_events(organization))
         
-        # print(f"STARTED SCRAPING STUK EVENTS FOR {organization["name"]}")
+        print(f"STARTED SCRAPING STUK EVENTS FOR {organization["name"]}")
         
-        # # Add stuk events to list
-        # events_stuk.extend(stuk_scraper.get_stuk_events(organization))
+        # Add stuk events to list
+        events_stuk.extend(stuk_scraper.get_stuk_events(organization))
     
     print() # Empty line
     print("-------------------------")
