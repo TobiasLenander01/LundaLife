@@ -3,7 +3,7 @@ import { getEvents } from '@/server/db';
 
 export default async function EventsPage() {
     // Get events from database
-  const events = await getEvents();
+  const events: Event[] = await getEvents();
 
     return (
         <div className="p-4 space-y-4">
