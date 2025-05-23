@@ -107,6 +107,8 @@ def format_stuk_event(organization, event, occurrence):
         "name": occurrence["organization_event"]["title"],
         "description": BeautifulSoup(occurrence["organization_event"]["content"], "html.parser").get_text(),
         "address": address,
+        "latitude": None,
+        "longitude": None,
         "image": event["image_url"],
         "start_date": start_date_string,
         "end_date": end_date_string,

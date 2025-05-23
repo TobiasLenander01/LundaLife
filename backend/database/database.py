@@ -55,6 +55,8 @@ def upsert_event(event):
             event["name"],
             event["description"],
             event["address"],
+            event["latitude"],
+            event["longitude"],
             event["image"],
             event["start_date"],
             event["end_date"],
