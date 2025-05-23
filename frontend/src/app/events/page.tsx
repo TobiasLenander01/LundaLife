@@ -1,17 +1,9 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import { Event } from '@/types/db';
+import { getEvents } from '@/server/db';
 
-export default function EventsPage() {
-    const [events, setEvents] = useState<Event[]>([]);
-
-    useEffect(() => {
-        fetch('/api/events')
-            .then((res) => res.json())
-            .then(setEvents)
-            .catch(console.error);
-    }, []);
+export default async function EventsPage() {
+    // Get events from database
+  const events = await getEvents();
 
     return (
         <div className="p-4 space-y-4">
@@ -34,7 +26,7 @@ export default function EventsPage() {
                         {event.end_date ? new Date(event.end_date).toLocaleString() : 'TBD'}
                     </p>
                     <p className="text-sm mt-2 italic">
-                        Hosted by {event.organization_name} ({event.address})
+                        Hosted by {event.organization.name} ({event.address})
                     </p>
                     {event.link && (
                         <a

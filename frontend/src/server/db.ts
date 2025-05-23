@@ -1,7 +1,7 @@
 import db from '@/lib/db';
 import { Event } from '@/types/db';
 
-export async function getUpcomingEvents(): Promise<Event[]> {
+export async function getEvents(): Promise<Event[]> {
     const res = await db.query(`
     SELECT
       events.id,
