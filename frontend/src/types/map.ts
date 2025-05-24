@@ -4,5 +4,6 @@ export interface CustomMarker {
     lat: number;
     lng: number;
     title?: string;
+    content?: string;
     icon?: string | google.maps.Icon | google.maps.Symbol;
 }

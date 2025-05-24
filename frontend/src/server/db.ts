@@ -34,7 +34,7 @@ export async function getOrganizations(): Promise<Organization[]> {
     FROM
       organizations
     LEFT JOIN
-      events ON organizations.id = events.organization_id
+      events ON organizations.id = events.organization_id AND events.start_date > NOW()
     GROUP BY
       organizations.id
     ORDER BY

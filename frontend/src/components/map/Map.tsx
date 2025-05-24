@@ -50,7 +50,7 @@ export default function Map ({
                         position={{ lat: marker.lat, lng: marker.lng }}
                         title={marker.title}
                         icon={marker.icon}
-                        onClick={() => console.log(`Marker ${marker.id} clicked!`)}
+                        onClick={() => alert(`${marker.title} \n${marker.content}`)}
                     />
                 ))}
             </GoogleMap>

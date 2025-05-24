@@ -11,7 +11,8 @@ export default async function Home() {
     id: org.id,
     lat: org.latitude,
     lng: org.longitude,
-    title: org.name
+    title: org.name,
+    content: org.events?.map(event => `${event.name} ${event.start_date}`).join('\n') ?? '',
   }));
 
   // Render map with markers
