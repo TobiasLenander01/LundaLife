@@ -66,17 +66,17 @@ export async function getEvents(): Promise<Event[]> {
   // Define SQL query to fetch future events and their associated tickets
   const query = `
     SELECT
-      e.id,
-      e.organization_id,
-      e.name,
-      e.description,
-      e.address,
-      e.latitude,
-      e.longitude,
-      e.image,
-      e.link,
-      e.start_date,
-      e.end_date,
+      events.id,
+      events.organization_id,
+      events.name,
+      events.description,
+      events.address,
+      events.latitude,
+      events.longitude,
+      events.image,
+      events.link,
+      events.start_date,
+      events.end_date,
       COALESCE(
         (
           SELECT json_agg(
@@ -88,19 +88,19 @@ export async function getEvents(): Promise<Event[]> {
               'active', t.active,
               'count', t.count,
               'max_count_per_person', t.max_count_per_person
-            ) ORDER BY t.id ASC -- Or by price, name, etc.
+            ) ORDER BY t.id ASC
           )
           FROM tickets t
-          WHERE t.event_id = e.id
+          WHERE t.event_id = events.id
         ),
         '[]'::json
       ) AS tickets
     FROM
-      events e
+      events
     WHERE
-      e.start_date > NOW()
+      events.start_date > NOW()
     ORDER BY
-      e.start_date ASC;
+      events.start_date ASC;
   `;
 
   try {
