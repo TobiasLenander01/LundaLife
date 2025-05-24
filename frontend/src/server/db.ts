@@ -1,5 +1,5 @@
 import db from '@/lib/db';
-import { Organization, Event } from '@/types/db';
+import { Organization, Event, Ticket } from '@/types/db';
 
 export async function getOrganizations(): Promise<Organization[]> {
   
@@ -57,8 +57,72 @@ export async function getOrganizations(): Promise<Organization[]> {
       events: row.events as Event[] // Cast the events field to Event[]
     }));
   } catch (error) {
-    // Log and rethrow any errors encountered during the query
     console.error("Error fetching organizations with events:", error);
+    throw error;
+  }
+}
+
+export async function getEvents(): Promise<Event[]> {
+  // Define SQL query to fetch future events and their associated tickets
+  const query = `
+    SELECT
+      e.id,
+      e.organization_id,
+      e.name,
+      e.description,
+      e.address,
+      e.latitude,
+      e.longitude,
+      e.image,
+      e.link,
+      e.start_date,
+      e.end_date,
+      COALESCE(
+        (
+          SELECT json_agg(
+            json_build_object(
+              'id', t.id,
+              'event_id', t.event_id,
+              'name', t.name,
+              'price', t.price::text,
+              'active', t.active,
+              'count', t.count,
+              'max_count_per_person', t.max_count_per_person
+            ) ORDER BY t.id ASC -- Or by price, name, etc.
+          )
+          FROM tickets t
+          WHERE t.event_id = e.id
+        ),
+        '[]'::json
+      ) AS tickets
+    FROM
+      events e
+    WHERE
+      e.start_date > NOW()
+    ORDER BY
+      e.start_date ASC;
+  `;
+
+  try {
+    const res = await db.query(query);
+
+    // Map each row to the Event type, parsing the tickets JSON array
+    return res.rows.map(row => ({
+      id: row.id,
+      organization_id: row.organization_id,
+      name: row.name,
+      description: row.description,
+      address: row.address,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      image: row.image,
+      link: row.link,
+      start_date: row.start_date,
+      end_date: row.end_date,
+      tickets: row.tickets as Ticket[] // Cast the tickets field to Ticket[]
+    }));
+  } catch (error) {
+    console.error("Error fetching future events with tickets:", error);
     throw error;
   }
 }
