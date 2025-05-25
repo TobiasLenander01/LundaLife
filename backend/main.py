@@ -2,7 +2,6 @@ from scrapers import facebook_scraper, stuk_scraper
 from database import database as db
 
 def main():
-    
     # Load organizations from database
     organizations = db.get_all_organizations()
     
@@ -71,6 +70,11 @@ def main():
     print("-------------------------")
     print() # Empty line
     
+def get_organizations(urls):
+    
+    for url in urls:
+        organization = facebook_scraper.get_facebook_organization(url)
+        db.upsert_organization(organization)
 
 # Entry point for the script
 if __name__ == "__main__":

@@ -9,7 +9,8 @@ CREATE TABLE organizations (
     latitude DOUBLE PRECISION NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
     stuk_id BIGINT,
-    fb_id BIGINT
+    fb_id BIGINT,
+    icon TEXT
 );
 
 CREATE TABLE events (

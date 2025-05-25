@@ -7,6 +7,7 @@ export type Organization = {
   longitude: number;
   stuk_id: number | null;
   fb_id: number | null;
+  icon: string | null;
   events?: Event[];
 };
 

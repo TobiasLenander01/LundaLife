@@ -155,7 +155,8 @@ def upsert_organization(organization):
             organization["latitude"],
             organization["longitude"],
             organization.get("stuk_id"),
-            organization.get("fb_id")
+            organization.get("fb_id"),
+            organization.get("icon")
         ))
 
         db_org_id = cursor.fetchone()[0]

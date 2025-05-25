@@ -1,11 +1,12 @@
 INSERT INTO organizations (
-    name, address, latitude, longitude, stuk_id, fb_id
+    name, address, latitude, longitude, stuk_id, fb_id, icon
 )
-VALUES (%s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT (name) DO UPDATE SET
-    address = EXCLUDED.address,
-    latitude = EXCLUDED.latitude,
-    longitude = EXCLUDED.longitude,
-    stuk_id = EXCLUDED.stuk_id,
-    fb_id = EXCLUDED.fb_id
+    address = COALESCE(EXCLUDED.address, organizations.address),
+    latitude = COALESCE(EXCLUDED.latitude, organizations.latitude),
+    longitude = COALESCE(EXCLUDED.longitude, organizations.longitude),
+    stuk_id = COALESCE(EXCLUDED.stuk_id, organizations.stuk_id),
+    fb_id = COALESCE(EXCLUDED.fb_id, organizations.fb_id),
+    icon = COALESCE(EXCLUDED.icon, organizations.icon)
 RETURNING id;

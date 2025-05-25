@@ -13,6 +13,7 @@ export async function getOrganizations(): Promise<Organization[]> {
       organizations.longitude,
       organizations.stuk_id,
       organizations.fb_id,
+      organizations.icon,
       COALESCE(
         json_agg(
           json_build_object(
@@ -54,6 +55,7 @@ export async function getOrganizations(): Promise<Organization[]> {
       longitude: row.longitude,
       stuk_id: row.stuk_id,
       fb_id: row.fb_id,
+      icon: row.icon,
       events: row.events as Event[] // Cast the events field to Event[]
     }));
   } catch (error) {

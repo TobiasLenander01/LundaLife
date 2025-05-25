@@ -12,6 +12,7 @@ export default async function Home() {
     lat: org.latitude,
     lng: org.longitude,
     title: org.name,
+    icon: org.icon ?? undefined,
     content: org.events?.map(event => `${event.name} ${event.start_date}`).join('\n') ?? '',
   }));
 

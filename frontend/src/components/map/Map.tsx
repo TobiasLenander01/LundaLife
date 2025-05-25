@@ -10,7 +10,7 @@ interface MapComponentProps {
     initialZoom?: number;
 }
 
-export default function Map ({
+export default function Map({
     markers = [],
     center = { lat: 55.7047, lng: 13.1910 }, // Default to Lund, Sweden
     initialZoom = 13
@@ -49,7 +49,14 @@ export default function Map ({
                         key={marker.id}
                         position={{ lat: marker.lat, lng: marker.lng }}
                         title={marker.title}
-                        icon={marker.icon}
+                        icon={
+                            typeof marker.icon === 'string'
+                                ? {
+                                    url: marker.icon,
+                                    scaledSize: new window.google.maps.Size(35, 35)
+                                }
+                                : undefined
+                        }
                         onClick={() => alert(`${marker.title} \n${marker.content}`)}
                     />
                 ))}
