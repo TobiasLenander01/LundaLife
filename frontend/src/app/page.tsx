@@ -1,10 +1,23 @@
-import { getEvents } from '@/server/db';
+import { getOrganizations } from '@/server/db';
+import { Organization } from '@/types/db';
 import Map from '@/components/map/Map';
 
 export default async function Home() {
-  // Get events from database
-  const events = await getEvents();
+  // Get organizations from database
+  const organizations: Organization[] = await getOrganizations();
 
-  // Render map with events
-  return <Map events={events.length > 0 ? events : []} />;
+  // Create markers for each organization
+  const markers = organizations.map(org => ({
+    id: org.id,
+    lat: org.latitude,
+    lng: org.longitude,
+    title: org.name,
+    icon: org.icon ?? undefined,
+    content: org.events?.map(event => `${event.name} ${event.start_date}`).join('\n') ?? '',
+  }));
+
+  // Render map with markers
+  return (
+    <Map markers={markers} />
+  );
 }

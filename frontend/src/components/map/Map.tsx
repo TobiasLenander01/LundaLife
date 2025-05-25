@@ -1,21 +1,24 @@
 'use client';
 
 import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
-import { useMemo } from 'react';
 import mapStyle from '@/lib/map/mapStyle.json';
-import { Event } from '@/types/db';
+import { CustomMarker } from '@/types/map';
 
-interface MapProps {
-    events?: Event[];
+interface MapComponentProps {
+    markers?: CustomMarker[];
+    center?: { lat: number; lng: number };
+    initialZoom?: number;
 }
 
-export default function Map ({ events = [] }: MapProps) {
+export default function Map({
+    markers = [],
+    center = { lat: 55.7047, lng: 13.1910 }, // Default to Lund, Sweden
+    initialZoom = 13
+}: MapComponentProps) {
+    // Load google maps
     const { isLoaded, loadError } = useLoadScript({
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
     });
-
-    // Lund, Sweden coordinates
-    const center = useMemo(() => ({ lat: 55.7047, lng: 13.1910 }), []);
 
     if (loadError) {
         console.error("Google Maps API load error:", loadError);
@@ -27,7 +30,7 @@ export default function Map ({ events = [] }: MapProps) {
         <div className="w-screen h-screen bg-black">
             <GoogleMap
                 center={center}
-                zoom={13}
+                zoom={initialZoom}
                 mapContainerClassName="w-full h-full"
                 options={{
                     styles: mapStyle,
@@ -40,20 +43,21 @@ export default function Map ({ events = [] }: MapProps) {
                     gestureHandling: 'greedy',
                 }}
             >
-                {events.map((event: Event) => (
+                {/* Map over the markers array and render a <Marker> for each */}
+                {markers.map((marker) => (
                     <Marker
-                        key={event.id}
-                        position={{
-                            // TODO: Ensure latitude and longitude are not null.
-                            lat: event.latitude!,
-                            lng: event.longitude!,
-                        }}
-                        label={event.organization.name.charAt(0).toUpperCase()}
-                        title={`${event.name} by ${event.organization.name}`}
-                        onClick={() => {
-                            console.log(`Clicked on event: ${event.name} (ID: ${event.id})`);
-                            alert(`Event: ${event.name}\nOrganization: ${event.organization.name}\nAddress: ${event.address || 'N/A'}`);
-                        }}
+                        key={marker.id}
+                        position={{ lat: marker.lat, lng: marker.lng }}
+                        title={marker.title}
+                        icon={
+                            typeof marker.icon === 'string'
+                                ? {
+                                    url: marker.icon,
+                                    scaledSize: new window.google.maps.Size(35, 35)
+                                }
+                                : undefined
+                        }
+                        onClick={() => alert(`${marker.title} \n${marker.content}`)}
                     />
                 ))}
             </GoogleMap>
