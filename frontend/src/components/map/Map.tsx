@@ -1,25 +1,36 @@
 'use client';
 
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
-import { useMemo } from 'react';
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
 import mapStyle from '@/lib/map/mapStyle.json';
+import { CustomMarker } from '@/types/map';
 
-const Map = () => {
+interface MapComponentProps {
+    markers?: CustomMarker[];
+    center?: { lat: number; lng: number };
+    initialZoom?: number;
+}
+
+export default function Map({
+    markers = [],
+    center = { lat: 55.7047, lng: 13.1910 }, // Default to Lund, Sweden
+    initialZoom = 13
+}: MapComponentProps) {
+    // Load google maps
     const { isLoaded, loadError } = useLoadScript({
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
     });
 
-    // Lund, Sweden coordinates
-    const center = useMemo(() => ({ lat: 55.7047, lng: 13.1910 }), []);
-
-    if (loadError) return <div>Failed to load maps</div>;
-    if (!isLoaded) return <div>Loading...</div>;
+    if (loadError) {
+        console.error("Google Maps API load error:", loadError);
+        return <div>Failed to load maps. Check the console for details.</div>;
+    }
+    if (!isLoaded) return <div>Loading Google Maps...</div>;
 
     return (
         <div className="w-screen h-screen bg-black">
             <GoogleMap
                 center={center}
-                zoom={13}
+                zoom={initialZoom}
                 mapContainerClassName="w-full h-full"
                 options={{
                     styles: mapStyle,
@@ -32,9 +43,24 @@ const Map = () => {
                     gestureHandling: 'greedy',
                 }}
             >
+                {/* Map over the markers array and render a <Marker> for each */}
+                {markers.map((marker) => (
+                    <Marker
+                        key={marker.id}
+                        position={{ lat: marker.lat, lng: marker.lng }}
+                        title={marker.title}
+                        icon={
+                            typeof marker.icon === 'string'
+                                ? {
+                                    url: marker.icon,
+                                    scaledSize: new window.google.maps.Size(35, 35)
+                                }
+                                : undefined
+                        }
+                        onClick={() => alert(`${marker.title} \n${marker.content}`)}
+                    />
+                ))}
             </GoogleMap>
         </div>
     );
 };
-
-export default Map;

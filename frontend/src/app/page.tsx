@@ -1,12 +1,23 @@
+import { getOrganizations } from '@/server/db';
+import { Organization } from '@/types/db';
+import Map from '@/components/map/Map';
 
-// Load the map component on client-side only
-'use client';
-import dynamic from 'next/dynamic';
-const Map = dynamic(() => import('@/components/map/Map'), { ssr: false });
+export default async function Home() {
+  // Get organizations from database
+  const organizations: Organization[] = await getOrganizations();
 
-// Export the home page component
-export default function Home() {
+  // Create markers for each organization
+  const markers = organizations.map(org => ({
+    id: org.id,
+    lat: org.latitude,
+    lng: org.longitude,
+    title: org.name,
+    icon: org.icon ?? undefined,
+    content: org.events?.map(event => `${event.name} ${event.start_date}`).join('\n') ?? '',
+  }));
+
+  // Render map with markers
   return (
-    <Map />
+    <Map markers={markers} />
   );
 }

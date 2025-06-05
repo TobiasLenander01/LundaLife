@@ -1,7 +1,15 @@
-import EventCard from '@/components/EventCard';
+import { getEvents } from '@/server/db';
+import { Event } from '@/types/db';
 
-export default function EventsPage() {
+export default async function EventsPage() {
+    // Load events from database
+    const events: Event[] = await getEvents();
+
     return (
-        <EventCard />
+        <div>
+            {events.map(event => (
+                <h1 key={event.id}>{event.name}</h1>
+            ))}
+        </div>
     );
 }
