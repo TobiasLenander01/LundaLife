@@ -1,3 +1,10 @@
+
+/*
+ * Provides database access functions for fetching organizations and their associated future events,
+ * as well as standalone future events, from the application's PostgreSQL database.
+ * Utilizes parameterized SQL queries and maps database rows to TypeScript types for use in the frontend.
+ */
+
 import db from '@/lib/db';
 import { Organization, Event } from '@/types/db';
 
@@ -59,7 +66,7 @@ export async function getOrganizations(): Promise<Organization[]> {
       events: row.events as Event[] // Cast the events field to Event[]
     }));
   } catch (error) {
-    console.error("Error fetching organizations with events:", error);
+    console.error("Error fetching organizations:", error);
     throw error;
   }
 }
@@ -80,7 +87,7 @@ export async function getEvents(): Promise<Event[]> {
   try {
     const res = await db.query(query);
 
-    // Map each row to the Event type, parsing the tickets JSON array
+    // Map each row to the Event type
     return res.rows.map(row => ({
       id: row.id,
       organization_id: row.organization_id,
@@ -95,7 +102,7 @@ export async function getEvents(): Promise<Event[]> {
       end_date: row.end_date
     }));
   } catch (error) {
-    console.error("Error fetching future events with tickets:", error);
+    console.error("Error fetching events:", error);
     throw error;
   }
 }
