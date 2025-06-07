@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS organizations;
 
@@ -28,17 +27,4 @@ CREATE TABLE events (
 
     CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
     CONSTRAINT unique_event_org_start UNIQUE (organization_id, start_date)
-);
-
-CREATE TABLE tickets (
-    id SERIAL PRIMARY KEY,
-    event_id BIGINT NOT NULL,
-    name TEXT,
-    price NUMERIC(10, 2),
-    active BOOLEAN,
-    count INTEGER,
-    max_count_per_person INTEGER,
-
-    CONSTRAINT fk_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-    CONSTRAINT unique_ticket_for_event UNIQUE (event_id, name)
 );

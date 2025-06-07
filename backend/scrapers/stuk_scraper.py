@@ -113,43 +113,5 @@ def format_stuk_event(organization, event, occurrence):
         "link": bouncer_link
     }
     
-    # Add tickets to event
-    tickets = get_stuk_tickets(occurrence)
-    if tickets:
-        print(f"Tickets found for {formatted_event["name"]}")
-        formatted_event["tickets"] = tickets
-    
     # Return the formatted event
     return formatted_event
-    
-def get_stuk_tickets(occurrence):
-    
-    # Create an empty list to store formatted tickets
-    tickets = []
-
-    # Get ticket data from the occurrence
-    ticket_data = occurrence.get("tickets")
-
-    # Check if there are tickets available
-    if not ticket_data:
-        return []
-        
-    # Loop through each ticket
-    for ticket in ticket_data:
-        
-        # Remove trailing zeros
-        price = ticket["price"] / 100
-        
-        # Format the ticket data
-        formatted_ticket = {
-            "name": ticket["name"],
-            "count": ticket["count"],
-            "price": price,
-            "active": ticket.get("is_active"),
-            "max_count_per_person": ticket.get("max_count_per_member")
-        }
-
-        # Add the formatted ticket to the list
-        tickets.append(formatted_ticket)
-        
-    return tickets

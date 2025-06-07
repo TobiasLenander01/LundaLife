@@ -1,5 +1,5 @@
 import db from '@/lib/db';
-import { Organization, Event, Ticket } from '@/types/db';
+import { Organization, Event } from '@/types/db';
 
 export async function getOrganizations(): Promise<Organization[]> {
   
@@ -68,35 +68,7 @@ export async function getEvents(): Promise<Event[]> {
   // Define SQL query to fetch future events and their associated tickets
   const query = `
     SELECT
-      events.id,
-      events.organization_id,
-      events.name,
-      events.description,
-      events.address,
-      events.latitude,
-      events.longitude,
-      events.image,
-      events.link,
-      events.start_date,
-      events.end_date,
-      COALESCE(
-        (
-          SELECT json_agg(
-            json_build_object(
-              'id', t.id,
-              'event_id', t.event_id,
-              'name', t.name,
-              'price', t.price::text,
-              'active', t.active,
-              'count', t.count,
-              'max_count_per_person', t.max_count_per_person
-            ) ORDER BY t.id ASC
-          )
-          FROM tickets t
-          WHERE t.event_id = events.id
-        ),
-        '[]'::json
-      ) AS tickets
+      *
     FROM
       events
     WHERE
@@ -120,8 +92,7 @@ export async function getEvents(): Promise<Event[]> {
       image: row.image,
       link: row.link,
       start_date: row.start_date,
-      end_date: row.end_date,
-      tickets: row.tickets as Ticket[] // Cast the tickets field to Ticket[]
+      end_date: row.end_date
     }));
   } catch (error) {
     console.error("Error fetching future events with tickets:", error);
