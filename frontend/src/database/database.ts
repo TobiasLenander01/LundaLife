@@ -5,8 +5,8 @@
  * Utilizes parameterized SQL queries and maps database rows to TypeScript types for use in the frontend.
  */
 
-import db from '@/lib/db';
-import { Organization, Event } from '@/types/db';
+import db from '@/database/pool';
+import { Organization, Event } from '@/types/database';
 
 export async function getOrganizations(): Promise<Organization[]> {
   

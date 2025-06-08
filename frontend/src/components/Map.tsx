@@ -1,7 +1,7 @@
 'use client';
 
 import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
-import { Organization } from '@/types/db';
+import { Organization } from '@/types/database';
 import { CustomMarker } from '@/types/map';
 
 interface MapComponentProps {

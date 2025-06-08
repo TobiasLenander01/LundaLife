@@ -1,5 +1,5 @@
-import { getOrganizations } from '@/database/db';
-import Map from '@/components/GoogleMap';
+import { getOrganizations } from '@/database/database';
+import Map from '@/components/Map';
 
 export default async function Page() {
   // Fetch organizations from the database
