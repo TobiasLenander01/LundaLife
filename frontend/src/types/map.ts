@@ -13,4 +13,5 @@ export interface CustomMarker {
     title?: string;
     content?: string;
     icon?: string | google.maps.Icon | google.maps.Symbol;
+    onClick?: () => void;
 }

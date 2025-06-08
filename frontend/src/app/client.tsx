@@ -1,8 +1,8 @@
-// client.tsx
 'use client';
 
 import Map from '@/components/Map';
 import Drawer from '@/components/Drawer';
+import EventCard from '@/components/EventCard';
 import { Organization } from '@/types/database';
 import { CustomMarker } from '@/types/map';
 import React, { useState } from 'react';
@@ -12,11 +12,8 @@ interface ClientProps {
 }
 
 export default function Client({ organizations = [] }: ClientProps) {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const handleOpenDrawer = () => {
-    setIsDrawerOpen(true);
-  };
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
 
   const markers: CustomMarker[] = organizations.map((org) => ({
     id: org.id,
@@ -24,38 +21,39 @@ export default function Client({ organizations = [] }: ClientProps) {
     lng: org.longitude,
     title: org.name,
     icon: org.icon ?? undefined,
-    content:
-      org.events?.map((event) => `${event.name} ${event.start_date}`).join('\n') ?? '',
+    onClick: () => setSelectedOrganization(org),
   }));
+
+  const handleDrawerClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      setSelectedOrganization(null);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
-      <button
-        onClick={handleOpenDrawer}
-        className="absolute top-4 left-4 z-10 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-lg"
-      >
-        Open Drawer
-      </button>
 
+      {/* Render Google Map with markers for the organizations */}
       <Map markers={markers} />
 
-      {/* Pass the new required `title` prop here */}
-      <Drawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        title="List of Organizations" // A descriptive title for screen readers
-      >
-        <h2 className="text-xl font-bold mb-4">Organizations</h2>
-        <p className="text-zinc-600 mb-6">
-          Here is a list of organizations from the map.
-        </p>
-        <ul className="space-y-2">
-          {organizations.map((org) => (
-            <li key={org.id} className="font-medium text-gray-800">
-              {org.name}
-            </li>
-          ))}
-        </ul>
+      {/* Drawer for displaying organization details */}
+      <Drawer open={!!selectedOrganization} onOpenChange={handleDrawerClose}>
+
+        {selectedOrganization && ( <>
+            <h2 className="text-xl font-bold mb-4">{selectedOrganization.name}</h2>
+            <h3 className="text-lg font-semibold mb-2">Events</h3>
+            {selectedOrganization.events && selectedOrganization.events.length > 0 ? (
+              <div>
+                {selectedOrganization.events.map((event) => (
+                  <EventCard event={event} key={event.id} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">No events found for this organization.</p>
+            )}
+          </>
+        )}
+
       </Drawer>
     </div>
   );

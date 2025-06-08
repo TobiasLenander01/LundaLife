@@ -54,7 +54,7 @@ export default function MapComponent({
                             key={index}
                             position={{ lat: marker.lat, lng: marker.lng }}
                             title={marker.title}
-                            onClick={() => alert(marker.content)}
+                            onClick={marker.onClick}
                         />
                     ))}
 
