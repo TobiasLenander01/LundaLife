@@ -1,63 +1,100 @@
-import React from 'react';
+// BottomSheet.tsx
+'use client';
+
+import React, { useEffect, useRef } from 'react';
+import { motion, useMotionValue, animate } from 'framer-motion';
+import { useDrag } from '@use-gesture/react';
 
 interface BottomSheetProps {
   isOpen: boolean;
+  onOpen: () => void;
   onClose: () => void;
   children: React.ReactNode;
+  peekHeight?: number;
 }
 
-/**
- * A non-modal BottomSheet that allows interaction with the content behind it.
- */
-const BottomSheet: React.FC<BottomSheetProps> = ({ isOpen, onClose, children }) => {
+const BottomSheet: React.FC<BottomSheetProps> = ({
+  isOpen,
+  onOpen,
+  onClose,
+  children,
+  peekHeight = 80,
+}) => {
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const y = useMotionValue(0);
+
+  useEffect(() => {
+    if (sheetRef.current) {
+      const sheetHeight = sheetRef.current.offsetHeight;
+      const openY = 0;
+      const closedY = sheetHeight - peekHeight;
+
+      animate(y, isOpen ? openY : closedY, {
+        type: 'spring',
+        damping: 25,
+        stiffness: 250,
+      });
+    }
+  }, [isOpen, peekHeight, y]);
+
+  const bind = useDrag(
+    ({ last, movement: [, my], velocity: [, vy], direction: [, dy], memo = y.get() }) => {
+      if (vy > 0.5 && dy > 0) {
+        onClose();
+      } else if (vy > 0.5 && dy < 0) {
+        onOpen();
+      } else if (last) {
+        const sheetHeight = sheetRef.current?.offsetHeight ?? window.innerHeight;
+        if (memo + my < sheetHeight / 2) {
+          onOpen();
+        } else {
+          onClose();
+        }
+      } else {
+        y.set(memo + my);
+      }
+      return memo;
+    },
+    {
+      from: () => [0, y.get()],
+      bounds: { top: 0 },
+      rubberband: 0.2,
+      axis: 'y',
+    }
+  );
+
   return (
-    // Main container. It covers the screen but is non-interactive.
-    <div
-      className={`
-        fixed inset-0 z-50 flex items-end
-        ${/* 
-          THIS IS THE KEY FIX: The container is non-interactive, allowing
-          clicks to pass through to the content behind it.
-        */''}
-        pointer-events-none
-        transition-opacity duration-300 ease-in-out
-        ${isOpen ? 'opacity-100' : 'opacity-0'}
-      `}
-      aria-hidden={!isOpen}
-    >
-      {/* Semi-transparent backdrop (inherits pointer-events-none) */}
-      <div
+    <div className="fixed inset-0 z-50 pointer-events-none">
+      <motion.div
         className="absolute inset-0 bg-black/40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
         aria-hidden="true"
       />
-
-      {/* The sheet panel */}
-      <div
+      
+      <motion.div
+        ref={sheetRef}
+        {...bind() as any}
         className={`
-          relative w-full bg-white rounded-t-2xl shadow-lg
-          transform transition-transform duration-300 ease-in-out
+          absolute bottom-0 left-0 right-0
+          w-full bg-white rounded-t-2xl shadow-lg
           p-4 pt-6
-          ${/* 
-            THIS IS THE OTHER HALF OF THE FIX: We explicitly re-enable
-            pointer events for the sheet panel itself.
-          */''}
           pointer-events-auto
-          ${isOpen ? 'translate-y-0' : 'translate-y-full'}
+          touch-none
         `}
+        style={{ y }}
         role="dialog"
         aria-modal="false"
       >
-        {/* Grabber handle */}
         <div
-          className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 rounded-full"
+          className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 rounded-full cursor-grab active:cursor-grabbing"
           aria-hidden="true"
         />
-
-        {/* Content area */}
         <div className="max-h-[80vh] overflow-y-auto">
           {children}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
