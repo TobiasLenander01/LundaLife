@@ -1,6 +1,7 @@
 import { getOrganizations } from '@/database/db';
 import { Organization } from '@/types/db';
-import MapComponent from '@/components/map/Map';
+import MapComponent from '@/components/Map';
+import BottomSheet from '@/components/BottomSheet';
 
 export default async function Home() {
   // Get organizations from database
@@ -18,6 +19,17 @@ export default async function Home() {
 
   // Render map with markers
   return (
-    <MapComponent markers={markers} />
+    <div>
+      <MapComponent markers={markers} />
+      <BottomSheet title="Always-On Drawer">
+        <div className="p-4">
+          <h2 className="text-lg font-semibold">Always-On Drawer</h2>
+          <p>This drawer is always visible and cannot be closed by the user.</p>
+          <p className="mt-4">
+            You can still interact with it by changing its snap points.
+          </p>
+        </div>
+      </BottomSheet>
+    </div>
   );
 }
