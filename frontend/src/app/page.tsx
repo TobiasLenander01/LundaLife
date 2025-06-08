@@ -1,10 +1,10 @@
 import { getOrganizations } from '@/database/db';
-import MapPageClient from '@/components/MapClient';
+import Map from '@/components/GoogleMap';
 
 export default async function Page() {
   // Fetch organizations from the database
   const organizations = await getOrganizations();
 
-  // Pass the organizations to the MapPageClient component
-  return <MapPageClient organizations={organizations} />;
+  // Pass the organizations to the Map component
+  return <Map organizations={organizations} />;
 }
