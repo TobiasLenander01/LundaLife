@@ -1,49 +1,65 @@
-'use client';
+import React from 'react';
 
-import { clsx } from 'clsx';
-import { useState } from 'react';
-import { Drawer } from 'vaul';
-import type { ReactNode } from 'react';
-
-interface VaulDrawerProps {
-  children: ReactNode;
-  title: string;
+interface BottomSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
 }
 
-const snapPoints = ['148px', '800px', 1];
-
-export default function BottomSheet({ children, title }: VaulDrawerProps) {
-  const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);
-  
-  const FADE_FROM_INDEX = 1;
-
+/**
+ * A non-modal BottomSheet that allows interaction with the content behind it.
+ */
+const BottomSheet: React.FC<BottomSheetProps> = ({ isOpen, onClose, children }) => {
   return (
-    <Drawer.Root
-      open={true}
-      dismissible={false}
-      snapPoints={snapPoints}
-      activeSnapPoint={snap}
-      setActiveSnapPoint={setSnap}
-      fadeFromIndex={FADE_FROM_INDEX}
+    // Main container. It covers the screen but is non-interactive.
+    <div
+      className={`
+        fixed inset-0 z-50 flex items-end
+        ${/* 
+          THIS IS THE KEY FIX: The container is non-interactive, allowing
+          clicks to pass through to the content behind it.
+        */''}
+        pointer-events-none
+        transition-opacity duration-300 ease-in-out
+        ${isOpen ? 'opacity-100' : 'opacity-0'}
+      `}
+      aria-hidden={!isOpen}
     >
-      <Drawer.Overlay className="fixed inset-0 bg-black/60 pointer-events-none" />
-      <Drawer.Portal>
-        <Drawer.Content
-          data-testid="content"
-          className="fixed flex flex-col bg-white border border-gray-200 border-b-none rounded-t-3xl bottom-0 left-0 right-0 h-full max-h-[97%] mx-[-1px]"
-        >
-          <div
-            className={clsx('flex flex-col max-w-md mx-auto w-full p-4 pt-5', {
-              'overflow-y-auto': snap === 1,
-              'overflow-hidden': snap !== 1,
-            })}
-          >
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 mb-4" />
-            <Drawer.Title className="sr-only">{title}</Drawer.Title>
-            {children}
-          </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+      {/* Semi-transparent backdrop (inherits pointer-events-none) */}
+      <div
+        className="absolute inset-0 bg-black/40"
+        aria-hidden="true"
+      />
+
+      {/* The sheet panel */}
+      <div
+        className={`
+          relative w-full bg-white rounded-t-2xl shadow-lg
+          transform transition-transform duration-300 ease-in-out
+          p-4 pt-6
+          ${/* 
+            THIS IS THE OTHER HALF OF THE FIX: We explicitly re-enable
+            pointer events for the sheet panel itself.
+          */''}
+          pointer-events-auto
+          ${isOpen ? 'translate-y-0' : 'translate-y-full'}
+        `}
+        role="dialog"
+        aria-modal="false"
+      >
+        {/* Grabber handle */}
+        <div
+          className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 rounded-full"
+          aria-hidden="true"
+        />
+
+        {/* Content area */}
+        <div className="max-h-[80vh] overflow-y-auto">
+          {children}
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default BottomSheet;
