@@ -8,6 +8,7 @@ interface MapComponentProps {
     center?: { lat: number; lng: number }
 }
 
+
 export default function MapComponent({
     markers = [],
     center = { lat: 55.7047, lng: 13.1910 }
@@ -53,9 +54,10 @@ export default function MapComponent({
                         <AdvancedMarker
                             key={index}
                             position={{ lat: marker.lat, lng: marker.lng }}
-                            title={marker.title}
                             onClick={marker.onClick}
-                        />
+                        >
+                            🏠{marker.title}
+                        </AdvancedMarker>
                     ))}
 
                 </Map>
