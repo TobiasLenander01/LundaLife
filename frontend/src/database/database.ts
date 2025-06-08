@@ -1,5 +1,12 @@
-import db from '@/lib/db';
-import { Organization, Event, Ticket } from '@/types/db';
+
+/*
+ * Provides database access functions for fetching organizations and their associated future events,
+ * as well as standalone future events, from the application's PostgreSQL database.
+ * Utilizes parameterized SQL queries and maps database rows to TypeScript types for use in the frontend.
+ */
+
+import db from '@/database/pool';
+import { Organization, Event } from '@/types/database';
 
 export async function getOrganizations(): Promise<Organization[]> {
   
@@ -59,7 +66,7 @@ export async function getOrganizations(): Promise<Organization[]> {
       events: row.events as Event[] // Cast the events field to Event[]
     }));
   } catch (error) {
-    console.error("Error fetching organizations with events:", error);
+    console.error("Error fetching organizations:", error);
     throw error;
   }
 }
@@ -68,35 +75,7 @@ export async function getEvents(): Promise<Event[]> {
   // Define SQL query to fetch future events and their associated tickets
   const query = `
     SELECT
-      events.id,
-      events.organization_id,
-      events.name,
-      events.description,
-      events.address,
-      events.latitude,
-      events.longitude,
-      events.image,
-      events.link,
-      events.start_date,
-      events.end_date,
-      COALESCE(
-        (
-          SELECT json_agg(
-            json_build_object(
-              'id', t.id,
-              'event_id', t.event_id,
-              'name', t.name,
-              'price', t.price::text,
-              'active', t.active,
-              'count', t.count,
-              'max_count_per_person', t.max_count_per_person
-            ) ORDER BY t.id ASC
-          )
-          FROM tickets t
-          WHERE t.event_id = events.id
-        ),
-        '[]'::json
-      ) AS tickets
+      *
     FROM
       events
     WHERE
@@ -108,7 +87,7 @@ export async function getEvents(): Promise<Event[]> {
   try {
     const res = await db.query(query);
 
-    // Map each row to the Event type, parsing the tickets JSON array
+    // Map each row to the Event type
     return res.rows.map(row => ({
       id: row.id,
       organization_id: row.organization_id,
@@ -120,11 +99,10 @@ export async function getEvents(): Promise<Event[]> {
       image: row.image,
       link: row.link,
       start_date: row.start_date,
-      end_date: row.end_date,
-      tickets: row.tickets as Ticket[] // Cast the tickets field to Ticket[]
+      end_date: row.end_date
     }));
   } catch (error) {
-    console.error("Error fetching future events with tickets:", error);
+    console.error("Error fetching events:", error);
     throw error;
   }
 }

@@ -1,4 +1,14 @@
 
+/**
+ * Defines TypeScript types representing database entities used in the application.
+ * 
+ * @fileoverview
+ * This file contains type definitions for `Organization` and `Event` entities,
+ * modeling their structure as stored and used within the frontend application.
+ * These types facilitate type safety and code completion when interacting with
+ * organization and event data throughout the codebase.
+ */
+
 export type Organization = {
   id: number;
   name: string;
@@ -23,15 +33,4 @@ export type Event = {
   link: string | null;
   start_date: string;
   end_date: string | null;
-  tickets?: Ticket[];
-};
-
-export type Ticket = {
-  id: number;
-  event_id: number;
-  name: string | null;
-  price: string | null;
-  active: boolean | null;
-  count: number | null;
-  max_count_per_person: number | null;
 };

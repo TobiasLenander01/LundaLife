@@ -29,7 +29,6 @@ def __load_query(query_name):
 
 # Load queries once when module is imported
 UPSERT_EVENT_QUERY = __load_query("upsert_event")
-UPSERT_TICKET_QUERY = __load_query("upsert_ticket")
 UPSERT_ORGANIZATION_QUERY = __load_query("upsert_organization")
 GET_ORGANIZATIONS_QUERY = __load_query("get_organizations")
 
@@ -85,50 +84,6 @@ def upsert_event(event):
             
         # Return None on failure
         return None
-    finally:
-        # Close the cursor and connection
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-def upsert_ticket(db_event_id, ticket):
-    """
-    Adds or updates a ticket to the database for a given event.
-    """
-    
-    # Reset variables
-    conn = None
-    cursor = None
-    
-    try:
-        # Connect to the database
-        conn = psycopg2.connect(DATABASE_URL)
-        cursor = conn.cursor()
-        
-        # Execute the query with the ticket details
-        cursor.execute(UPSERT_TICKET_QUERY, (
-            db_event_id, # This is the foreign key to the events table
-            ticket.get("name"),
-            ticket.get("price"),
-            ticket.get("active"),
-            ticket.get("count"),
-            ticket.get("max_count_per_person")
-        ))
-
-        # Commit the transaction
-        conn.commit()
-        
-        # Print info about the ticket
-        print(f"DATABASE Processed ticket: '{ticket.get('name')}' for event ID {db_event_id}")
-
-    except Exception as e:
-        # Print error message
-        print(f"DATABASE Error processing ticket '{ticket.get('name')}': {e}")
-        
-        # If an error occurs, rollback the transaction
-        if conn:
-            conn.rollback()
     finally:
         # Close the cursor and connection
         if cursor:
