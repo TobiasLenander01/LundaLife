@@ -1,4 +1,4 @@
-import { getEvents } from '@/server/db';
+import { getEvents } from '@/database/db';
 import { Event } from '@/types/db';
 
 export default async function EventsPage() {

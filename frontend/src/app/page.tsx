@@ -1,4 +1,4 @@
-import { getOrganizations } from '@/server/db';
+import { getOrganizations } from '@/database/db';
 import { Organization } from '@/types/db';
 import MapComponent from '@/components/map/Map';
 
