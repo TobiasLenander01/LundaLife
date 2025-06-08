@@ -1,6 +1,6 @@
 import { getOrganizations } from '@/server/db';
 import { Organization } from '@/types/db';
-import Map from '@/components/map/Map';
+import MapComponent from '@/components/map/Map';
 
 export default async function Home() {
   // Get organizations from database
@@ -18,6 +18,6 @@ export default async function Home() {
 
   // Render map with markers
   return (
-    <Map markers={markers} />
+    <MapComponent markers={markers} />
   );
 }
