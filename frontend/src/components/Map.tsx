@@ -1,27 +1,17 @@
 'use client';
 
 import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
-import { Organization } from '@/types/database';
 import { CustomMarker } from '@/types/map';
 
 interface MapComponentProps {
-    organizations?: Organization[];
+    markers?: CustomMarker[];
     center?: { lat: number; lng: number }
 }
 
 export default function MapComponent({
-    organizations = [],
+    markers = [],
     center = { lat: 55.7047, lng: 13.1910 }
 }: MapComponentProps) {
-
-    const markers: CustomMarker[] = organizations.map(org => ({
-        id: org.id,
-        lat: org.latitude,
-        lng: org.longitude,
-        title: org.name,
-        icon: org.icon ?? undefined,
-        content: org.events?.map(event => `${event.name} ${event.start_date}`).join('\n') ?? '',
-    }));
 
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
