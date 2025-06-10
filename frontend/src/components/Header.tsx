@@ -1,54 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FilterOption } from '@/types/app';
+import { useState, useRef } from 'react';
+import { FilterOption, FilterOptions } from '@/types/app';
 
 export interface HeaderComponentProps {
-  onFilterChange: (filterValue: string) => void;
-  initialFilterValue?: string;
+  selectedFilter: FilterOption;
+  handleFilterChange: (filter: FilterOption) => void;
 }
 
-const filterOptions: FilterOption[] = [
-  { value: 'today', label: 'Events today' },
-  { value: 'this-week', label: 'Events this week' },
-  { value: 'this-month', label: 'Events this month' },
-];
-
-const Header: React.FC<HeaderComponentProps> = ({
-  onFilterChange,
-  initialFilterValue = 'today',
-}) => {
+export default function Header({selectedFilter, handleFilterChange }: HeaderComponentProps) {
+  // State to manage dropdown visibility
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<FilterOption>(
-    filterOptions.find(opt => opt.value === initialFilterValue) || filterOptions[0]
-  );
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
+  // Function to handle filter selection
   const handleSelectFilter = (option: FilterOption) => {
-    setSelectedFilter(option);
-    onFilterChange(option.value);
+    handleFilterChange(option);
     setIsDropdownOpen(false);
   };
 
   return (
     
-    <header className="bg-white shadow-md px-6 py-4 sticky top-0 z-50 flex items-center">
-      {/* The container now handles the spacing and alignment */}
+    <header className="bg-white shadow-md px-6 py-4 sticky top-0 z-50 flex items-center select-none">
       <div className="container mx-auto flex justify-between items-center">
         
         {/* Logo and name */}
         <div className="flex items-center space-x-3">
-          {/* You might want to adjust logo height to fit the new header height */}
           <img src="/images/logo.png" alt="LundaLife Logo" className="h-12 w-auto" /> 
           <span className="text-xl font-semibold text-gray-800">LundaLife</span>
         </div>
@@ -84,7 +59,7 @@ const Header: React.FC<HeaderComponentProps> = ({
                 className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-20"
                 role="menu"
               >
-                {filterOptions.map((option) => (
+                {FilterOptions.map((option) => (
                   <li key={option.value}>
                     <button
                       onClick={() => handleSelectFilter(option)}
@@ -103,5 +78,3 @@ const Header: React.FC<HeaderComponentProps> = ({
     </header>
   );
 };
-
-export default Header;

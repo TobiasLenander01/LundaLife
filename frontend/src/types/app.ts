@@ -17,3 +17,10 @@ export interface FilterOption {
   value: string;
   label: string;
 }
+
+export const FilterOptions: FilterOption[] = [
+  { value: 'all', label: 'All organizations' },
+  { value: 'today', label: 'Events today' },
+  { value: 'this-week', label: 'Events this week' },
+  { value: 'this-month', label: 'Events this month' },
+];
