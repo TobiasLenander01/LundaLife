@@ -1,6 +1,6 @@
 'use client';
 
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import { CustomMarker } from '@/types/app';
 
 export interface MapComponentProps {
@@ -55,7 +55,11 @@ export default function MapComponent({
                             position={{ lat: marker.lat, lng: marker.lng }}
                             onClick={marker.onClick}
                         >
-                            🏠{marker.title}
+                            <Pin
+                                background={"#0C253E"}
+                                glyphColor={"#ffffff"}
+                                borderColor={"#0C253E"}
+                            />
                         </AdvancedMarker>
                     ))}
 

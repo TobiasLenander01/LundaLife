@@ -25,8 +25,6 @@ export default function Client({ organizations = [] }: ClientProps) {
       if (!org.events || org.events.length === 0) {
         return false;
       }
-      // Use .some() to find if at least one event matches the condition.
-      // CHANGED: We now use event.start_date, which is guaranteed to be a string.
       return org.events.some(event => dateCheckFn(event.start_date));
     };
 
@@ -53,11 +51,10 @@ export default function Client({ organizations = [] }: ClientProps) {
     }[selectedFilter.value];
 
     if (dateCheckFn) {
-      // CHANGED: We filter events based on event.start_date
       return selectedOrganization.events.filter(event => dateCheckFn(event.start_date));
     }
 
-    // Fallback: if no filter matches, show all events for the selected org
+    // if no filter matches, show all events for the selected org
     return selectedOrganization.events;
   }, [selectedOrganization, selectedFilter]);
 
