@@ -1,10 +1,11 @@
 'use client';
 
+import Header from "@/components/Header";
 import Map from '@/components/Map';
 import Drawer from '@/components/Drawer';
 import EventCard from '@/components/EventCard';
 import { Organization } from '@/types/database';
-import { CustomMarker } from '@/types/map';
+import { CustomMarker } from '@/types/app';
 import React, { useState } from 'react';
 
 interface ClientProps {
@@ -12,6 +13,14 @@ interface ClientProps {
 }
 
 export default function Client({ organizations = [] }: ClientProps) {
+  const [currentEventFilter, setCurrentEventFilter] = useState<string>('today');
+
+  const handleFilterChange = (filterValue: string) => {
+    console.log('Selected filter:', filterValue);
+    setCurrentEventFilter(filterValue);
+    // TODO: Implement filtering logic based on the selected filter value
+  };
+
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
 
   const markers: CustomMarker[] = organizations.map((org) => ({
@@ -31,6 +40,10 @@ export default function Client({ organizations = [] }: ClientProps) {
 
   return (
     <div className="flex flex-col h-screen">
+
+      {/* Render Header component with logo and filter drop down menu */}
+      <Header onFilterChange={handleFilterChange} initialFilterValue="today" />
+
       {/* Render Google Map with markers for the organizations */}
       <Map markers={markers} />
 
@@ -39,7 +52,7 @@ export default function Client({ organizations = [] }: ClientProps) {
         {selectedOrganization && (
           <>
             <h2 className="text-xl font-bold mb-4">{selectedOrganization.name}</h2>
-            <h3 className="text-lg font-semibold mb-2">Events</h3>
+            <h3 className="text-lg font-semibold mb-2">Events { currentEventFilter }</h3>
             {selectedOrganization.events && selectedOrganization.events.length > 0 ? (
               <div>
                 {selectedOrganization.events.map((event) => (
@@ -52,6 +65,7 @@ export default function Client({ organizations = [] }: ClientProps) {
           </>
         )}
       </Drawer>
+
     </div>
   );
 }

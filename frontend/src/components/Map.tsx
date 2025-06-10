@@ -1,13 +1,12 @@
 'use client';
 
 import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
-import { CustomMarker } from '@/types/map';
+import { CustomMarker } from '@/types/app';
 
-interface MapComponentProps {
+export interface MapComponentProps {
     markers?: CustomMarker[];
     center?: { lat: number; lng: number }
 }
-
 
 export default function MapComponent({
     markers = [],
