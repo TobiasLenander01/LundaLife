@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { FilterOption, FilterOptions } from '@/types/app';
+import Image from 'next/image';
 
 export interface HeaderComponentProps {
   selectedFilter: FilterOption;
@@ -24,7 +25,7 @@ export default function Header({selectedFilter, handleFilterChange }: HeaderComp
         
         {/* Logo and name */}
         <div className="flex items-center space-x-3">
-          <img src="/images/logo.png" alt="LundaLife Logo" className="h-12 w-auto" /> 
+          <Image src="/images/logo.png" alt="LundaLife Logo" width={48} height={48}/> 
           <span className="text-xl font-semibold text-gray-800">LundaLife</span>
         </div>
 
