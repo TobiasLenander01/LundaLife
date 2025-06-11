@@ -9,21 +9,21 @@ def get_facebook_events(organization, skip_old=True):
     
     # Check if organization has a fb_id
     if not organization.get("fb_id"):
-        print(f"No fb_id found for {organization["name"]}")
+        print(f"No fb_id found for {organization['name']}")
         return []
     
     # Define URL for the facebook organization events
-    url = f"https://www.facebook.com/{organization["fb_id"]}/events"
+    url = f"https://www.facebook.com/{organization['fb_id']}/events"
     
     # Console log
-    print(f"Found facebook url for {organization["name"]}: {url}")
+    print(f"Found facebook url for {organization['name']}: {url}")
     
     # Get request
     html = utils.get_html(url)
     
     # Check if get request succeeded
     if not html:
-        print(f"Facebook GET request for {organization["name"]} failed")
+        print(f"Facebook GET request for {organization['name']} failed")
         return []
     
     # Get json data from html
@@ -56,7 +56,7 @@ def get_facebook_events(organization, skip_old=True):
             events.append(event)
             
             # Console log
-            print(f"Retrieved {event["name"]} from facebook")
+            print(f"Retrieved {event['name']} from facebook")
     
     # Return list of events
     return events
@@ -94,11 +94,11 @@ def get_facebook_event(organization, fb_event_id):
         # Get address
         address = utils.find(json, "event_place/contextual_name")[0]
         if not address:
-            address = organization["address"]
+            address = organization['address']
             
         # Format event data in a dictionary
         event = {
-            "organization_id": organization["id"],
+            "organization_id": organization['id'],
             "organization_name": utils.find(json, "entity/short_name")[0],
             "name": utils.find(json, "meta/title")[0],
             "description": utils.find(json, "event_description/text")[0],
@@ -116,7 +116,7 @@ def get_facebook_event(organization, fb_event_id):
         return None
     
     # Console message
-    print(f"Found {event["organization_name"]} facebook event: {event["name"]} {event["link"]}")
+    print(f"Found {event['organization_name']} facebook event: {event['name']} {event['link']}")
     
     # Return the formatted event dictionary
     return event
@@ -148,9 +148,9 @@ def get_facebook_organization(url):
     
     # Get coordinates from event
     if event:
-        organization["latitude"] = event["latitude"]
-        organization["longitude"] = event["longitude"]
+        organization['latitude'] = event['latitude']
+        organization['longitude'] = event['longitude']
     
-    organization["id"] = None
+    organization['id'] = None
     
     return organization
