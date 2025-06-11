@@ -1,17 +1,16 @@
 'use client';
 
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
-import { CustomMarker } from '@/types/map';
+import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+import { CustomMarker } from '@/types/app';
 
-interface MapComponentProps {
+export interface MapComponentProps {
     markers?: CustomMarker[];
     center?: { lat: number; lng: number }
 }
 
-
 export default function MapComponent({
     markers = [],
-    center = { lat: 55.7047, lng: 13.1910 }
+    center = { lat: 55.7046, lng: 13.2034 }
 }: MapComponentProps) {
 
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -34,7 +33,7 @@ export default function MapComponent({
     };
 
     return (
-        <div style={{ height: '100vh', width: '100%' }}>
+        <div className="select-none h-full w-full">
             <APIProvider apiKey={apiKey}>
                 <Map
                     defaultCenter={center}
@@ -56,7 +55,11 @@ export default function MapComponent({
                             position={{ lat: marker.lat, lng: marker.lng }}
                             onClick={marker.onClick}
                         >
-                            🏠{marker.title}
+                            <Pin
+                                background={"#0C253E"}
+                                glyphColor={"#ffffff"}
+                                borderColor={"#0C253E"}
+                            />
                         </AdvancedMarker>
                     ))}
 

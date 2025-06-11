@@ -13,7 +13,7 @@ def get_facebook_events(organization, skip_old=True):
         return []
     
     # Define URL for the facebook organization events
-    url = f"https://www.facebook.com/{organization["fb_id"]}/events"
+    url = f"https://www.facebook.com/{organization['fb_id']}/events"
     
     # Console log
     print(f"Found facebook url for {organization["name"]}: {url}")
@@ -116,7 +116,7 @@ def get_facebook_event(organization, fb_event_id):
         return None
     
     # Console message
-    print(f"Found {event["organization_name"]} facebook event: {event["name"]} {event["link"]}")
+    print(f"Found {event['organization_name']} facebook event: {event['name']} {event['link']}")
     
     # Return the formatted event dictionary
     return event

@@ -1,12 +1,6 @@
 
 /**
  * Defines TypeScript types representing database entities used in the application.
- * 
- * @fileoverview
- * This file contains type definitions for `Organization` and `Event` entities,
- * modeling their structure as stored and used within the frontend application.
- * These types facilitate type safety and code completion when interacting with
- * organization and event data throughout the codebase.
  */
 
 export type Organization = {
