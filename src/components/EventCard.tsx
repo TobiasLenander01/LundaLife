@@ -1,4 +1,4 @@
-import { Event } from '@/types/database';
+import { Event } from '@/types/app';
 
 interface EventCardProps {
     event: Event;

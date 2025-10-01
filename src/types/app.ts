@@ -2,12 +2,12 @@
 import { ReactNode } from "react";
 
 export interface CustomMarker {
-    id: string | number;
-    lat: number;
-    lng: number;
-    title?: string;
-    glyph?: ReactNode;
-    onClick?: () => void;
+  id: string | number;
+  lat: number;
+  lng: number;
+  title?: string;
+  glyph?: ReactNode;
+  onClick?: () => void;
 }
 
 export interface FilterOption {
@@ -22,7 +22,7 @@ export const FilterOptions: FilterOption[] = [
   { value: 'all', label: 'All organizations' },
 ];
 
-export type Organization = {
+export interface Organization {
   id: number;
   name: string;
   address: string;
@@ -34,9 +34,8 @@ export type Organization = {
   events?: Event[];
 };
 
-export type Event = {
+export interface Event {
   id: number;
-  organization_id: number;
   name: string;
   description: string | null;
   address: string | null;
@@ -45,3 +44,22 @@ export type Event = {
   start_date: string;
   end_date: string | null;
 };
+
+// Types for the STUK API response
+export interface StukEventOccurrence {
+  start_date: string;
+  end_date?: string | null;
+  street_address?: string | null;
+  zip_code?: string | null;
+  city?: string | null;
+  deep_link?: string | null;
+}
+
+export interface StukEventData {
+  id: number;
+  title?: string | null;
+  content?: string | null;
+  image_url?: string | null;
+  url?: string | null;
+  organization_event_occurrences?: StukEventOccurrence[];
+}
