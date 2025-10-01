@@ -5,7 +5,7 @@ import Map from '@/components/Map';
 import Drawer from '@/components/Drawer';
 import EventCard from '@/components/EventCard';
 import { isToday, isThisWeek, isThisMonth } from '@/lib/helpers';
-import { Organization } from '@/types/database';
+import { Organization } from '@/types/app';
 import { CustomMarker, FilterOption, FilterOptions } from '@/types/app';
 import { useState, useMemo } from 'react';
 

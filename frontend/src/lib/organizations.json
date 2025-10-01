@@ -1,0 +1,114 @@
+[
+    {
+        "id": 1,
+        "name": "Blekingska Nationen",
+        "address": "Ole römers väg 14D, 22363, Lund",
+        "latitude": 55.7127939,
+        "longitude": 13.2133118,
+        "stuk_id": 2635
+    },
+    {
+        "id": 2,
+        "name": "Göteborgs Nation",
+        "address": "Östra Mårtensgatan 15, 223 61, Lund",
+        "latitude": 55.7015051,
+        "longitude": 13.1998779,
+        "stuk_id": 2653
+    },
+    {
+        "id": 3,
+        "name": "Hallands Nation",
+        "address": "Thomanders väg 3, Lund, Sweden",
+        "latitude": 55.70557,
+        "longitude": 13.2111,
+        "stuk_id": 2644
+    },
+    {
+        "id": 4,
+        "name": "Helsingkrona Nation",
+        "address": "Tornavägen 3C, Lund, Sweden",
+        "latitude": 55.70974,
+        "longitude": 13.20792,
+        "stuk_id": 2662
+    },
+    {
+        "id": 5,
+        "name": "Kalmar Nation",
+        "address": "Biskopsgatan 12, Lund, Sweden",
+        "latitude": 55.70648,
+        "longitude": 13.19836,
+        "stuk_id": 2672
+    },
+    {
+        "id": 6,
+        "name": "Kristianstads Nation",
+        "address": "Tornavägen 7, Lund, Sweden",
+        "latitude": 55.70902,
+        "longitude": 13.20751,
+        "stuk_id": 2680
+    },
+    {
+        "id": 7,
+        "name": "Lunds Nation",
+        "address": "Agardhsgatan 1, Lund, Sweden",
+        "latitude": 55.70355,
+        "longitude": 13.19982,
+        "stuk_id": 2689
+    },
+    {
+        "id": 8,
+        "name": "Malmö Nation",
+        "address": "Östra Vallgatan 51, Lund, Sweden",
+        "latitude": 55.70445,
+        "longitude": 13.20114,
+        "stuk_id": 2698
+    },
+    {
+        "id": 9,
+        "name": "Smålands Nation",
+        "address": "Kastanjegatan 7, Lund, Sweden",
+        "latitude": 55.697862943711,
+        "longitude": 13.198463916779,
+        "stuk_id": 2754
+    },
+    {
+        "id": 10,
+        "name": "Studentlund",
+        "address": "Sandgatan 2, Lund, Sweden",
+        "latitude": 55.708,
+        "longitude": 13.2109,
+        "stuk_id": 2513
+    },
+    {
+        "id": 11,
+        "name": "Sydskånska Nationen",
+        "address": "Tornavägen 5, Lund, Sweden",
+        "latitude": 55.70943,
+        "longitude": 13.20703,
+        "stuk_id": 2708
+    },
+    {
+        "id": 12,
+        "name": "Västgöta Nation",
+        "address": "Tornavägen 17-19, Lund, Sweden",
+        "latitude": 55.70529,
+        "longitude": 13.21047,
+        "stuk_id": 2710
+    },
+    {
+        "id": 13,
+        "name": "Wermlands Nation",
+        "address": "Stora Tvärgatan 13, Lund, Sweden",
+        "latitude": 55.69945,
+        "longitude": 13.19371,
+        "stuk_id": 2709
+    },
+    {
+        "id": 14,
+        "name": "Östgöta Nation",
+        "address": "Adelgatan 4, Lund, Sweden",
+        "latitude": 55.70451,
+        "longitude": 13.19814,
+        "stuk_id": 2711
+    }
+]
