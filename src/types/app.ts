@@ -19,23 +19,22 @@ export const FilterOptions: FilterOption[] = [
   { value: 'today', label: 'Events today' },
   { value: 'this-week', label: 'Events this week' },
   { value: 'this-month', label: 'Events this month' },
-  { value: 'all', label: 'All organizations' },
+  { value: 'all', label: 'All events' },
 ];
 
 export interface Organization {
-  id: number;
   name: string;
   address: string;
   latitude: number;
   longitude: number;
-  stuk_id: number | null;
+  stuk_id: number;
   fb_id?: number | null;
   icon?: string | null;
   events?: Event[];
 };
 
 export interface Event {
-  id: number;
+  id: string | number;  // Allow both string and number to support composite keys
   name: string;
   description: string | null;
   address: string | null;

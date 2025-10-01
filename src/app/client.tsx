@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Map from '@/components/Map';
 import Drawer from '@/components/Drawer';
 import EventCard from '@/components/EventCard';
+import OrganizationComponent from '@/components/Organization';
 import { isToday, isThisWeek, isThisMonth } from '@/lib/helpers';
 import { Organization } from '@/types/app';
 import { CustomMarker, FilterOption, FilterOptions } from '@/types/app';
@@ -65,7 +66,7 @@ export default function Client({ organizations = [] }: ClientProps) {
 
   // Create custom markers for the map based on organizations
   const markers: CustomMarker[] = filteredOrganizations.map((org) => ({
-    id: org.id,
+    id: org.stuk_id,
     lat: org.latitude,
     lng: org.longitude,
     title: org.name ?? 'Unnamed Organization',
@@ -92,19 +93,29 @@ export default function Client({ organizations = [] }: ClientProps) {
       {/* Drawer for displaying organization details */}
       <Drawer open={!!selectedOrganization} onOpenChange={handleDrawerClose}>
         {selectedOrganization && (
-          <>
-            <h2 className="text-xl font-bold mb-4">{selectedOrganization.name}</h2>
-            <h3 className="text-lg font-semibold mb-2">{selectedFilter.label}</h3>
-            {eventsForDrawer.length > 0 ? (
-              <div>
-                {eventsForDrawer.map((event) => (
-                  <EventCard event={event} key={event.id} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">No events found for this time period.</p>
-            )}
-          </>
+          <div className="space-y-6">
+            {/* Organization Info */}
+            <OrganizationComponent
+              organization={selectedOrganization}
+            />
+
+            {/* Events Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">{selectedFilter.label}</h3>
+              {eventsForDrawer.length > 0 ? (
+                <div className="space-y-4">
+                  {eventsForDrawer.map((event) => (
+                    <EventCard event={event} key={event.id} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 mb-2">No events found for this time period.</p>
+                  <p className="text-sm text-gray-400">Try selecting a different time filter.</p>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </Drawer>
 

@@ -74,9 +74,12 @@ async function getStukEvents(json: StukEventData[]): Promise<Event[]> {
             if (eventDate < new Date(currentDate.toDateString())) 
                 continue;
 
-            // Add to list of events
+            // Create unique ID by combining event ID with start date to handle multiple occurrences
+            const uniqueId = `${eventData.id}-${startDate}`;
+            
+            // Create the event object
             const event: Event = {
-                id: eventData.id,
+                id: uniqueId,
                 name: eventData.title || 'Unnamed Event',
                 description: eventData.content ? htmlLoad(eventData.content).text() : null,
                 address: `${occurrence.street_address || ''}, ${occurrence.zip_code || ''}, ${occurrence.city || ''}`.trim(),
@@ -86,6 +89,7 @@ async function getStukEvents(json: StukEventData[]): Promise<Event[]> {
                 end_date: occurrence.end_date || null,
             };
 
+            // Add to list of events
             events.push(event);
         }
     }

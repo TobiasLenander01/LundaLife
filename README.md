@@ -1,6 +1,6 @@
 ## About
 
-Text
+A next js app that loads events from the STUK API and displays them on a google map. Users can filter events by organization and view event details.
 
 ## License
 

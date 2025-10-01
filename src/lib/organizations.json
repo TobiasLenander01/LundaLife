@@ -1,114 +1,106 @@
 [
     {
-        "id": 1,
         "name": "Blekingska Nationen",
         "address": "Ole römers väg 14D, 22363, Lund",
         "latitude": 55.7127939,
         "longitude": 13.2133118,
-        "stuk_id": 2635
+        "stuk_id": 2635,
+        "icon": "https://api.stuk.co/media/1528/image/mm617pi_blekingska-nationen-logo.png"
     },
     {
-        "id": 2,
         "name": "Göteborgs Nation",
         "address": "Östra Mårtensgatan 15, 223 61, Lund",
         "latitude": 55.7015051,
         "longitude": 13.1998779,
-        "stuk_id": 2653
+        "stuk_id": 2653,
+        "icon": "https://api.stuk.co/media/4248/image/fg6uvnn_gteborgs-nation-logo.png"
     },
     {
-        "id": 3,
         "name": "Hallands Nation",
         "address": "Thomanders väg 3, Lund, Sweden",
         "latitude": 55.70557,
         "longitude": 13.2111,
-        "stuk_id": 2644
+        "stuk_id": 2644,
+        "icon": "https://api.stuk.co/media/1807/image/ltzwchu_hallands-logo-2024.png"
     },
     {
-        "id": 4,
         "name": "Helsingkrona Nation",
         "address": "Tornavägen 3C, Lund, Sweden",
         "latitude": 55.70974,
         "longitude": 13.20792,
-        "stuk_id": 2662
+        "stuk_id": 2662,
+        "icon": "https://api.stuk.co/media/40/image/lvxr7lh_helsingkrona_nation_logo.png"
     },
     {
-        "id": 5,
         "name": "Kalmar Nation",
         "address": "Biskopsgatan 12, Lund, Sweden",
         "latitude": 55.70648,
         "longitude": 13.19836,
-        "stuk_id": 2672
+        "stuk_id": 2672,
+        "icon": "https://api.stuk.co/media/188/image/48s9u8d_kalmar_nation_lund_logo.png"
     },
     {
-        "id": 6,
         "name": "Kristianstads Nation",
         "address": "Tornavägen 7, Lund, Sweden",
         "latitude": 55.70902,
         "longitude": 13.20751,
-        "stuk_id": 2680
+        "stuk_id": 2680,
+        "icon": "https://api.stuk.co/media/264/image/ud516rq_profilbild-fb.jpg"
     },
     {
-        "id": 7,
         "name": "Lunds Nation",
         "address": "Agardhsgatan 1, Lund, Sweden",
         "latitude": 55.70355,
         "longitude": 13.19982,
-        "stuk_id": 2689
+        "stuk_id": 2689,
+        "icon": "https://api.stuk.co/media/34/image/9ftb4oh_lunds_nation_logo.png"
     },
     {
-        "id": 8,
         "name": "Malmö Nation",
         "address": "Östra Vallgatan 51, Lund, Sweden",
         "latitude": 55.70445,
         "longitude": 13.20114,
-        "stuk_id": 2698
+        "stuk_id": 2698,
+        "icon": "https://api.stuk.co/media/213/image/7fk16e2_sdv-cxdcs.png"
     },
     {
-        "id": 9,
         "name": "Smålands Nation",
         "address": "Kastanjegatan 7, Lund, Sweden",
         "latitude": 55.697862943711,
         "longitude": 13.198463916779,
-        "stuk_id": 2754
+        "stuk_id": 2754,
+        "icon": "https://api.stuk.co/media/1587/image/mlgplgk_instagram-highlights-1.png"
     },
     {
-        "id": 10,
-        "name": "Studentlund",
-        "address": "Sandgatan 2, Lund, Sweden",
-        "latitude": 55.708,
-        "longitude": 13.2109,
-        "stuk_id": 2513
-    },
-    {
-        "id": 11,
         "name": "Sydskånska Nationen",
         "address": "Tornavägen 5, Lund, Sweden",
         "latitude": 55.70943,
         "longitude": 13.20703,
-        "stuk_id": 2708
+        "stuk_id": 2708,
+        "icon": "https://api.stuk.co/media/194/image/ig1f7m6_sydskanska_nation_lund_logo.png"
     },
     {
-        "id": 12,
         "name": "Västgöta Nation",
         "address": "Tornavägen 17-19, Lund, Sweden",
         "latitude": 55.70529,
         "longitude": 13.21047,
-        "stuk_id": 2710
+        "stuk_id": 2710,
+        "icon": "https://api.stuk.co/media/1533/image/ggbmg89_vstgta-nation-logo.png"
     },
     {
-        "id": 13,
         "name": "Wermlands Nation",
         "address": "Stora Tvärgatan 13, Lund, Sweden",
         "latitude": 55.69945,
         "longitude": 13.19371,
-        "stuk_id": 2709
+        "stuk_id": 2709,
+        "icon": "https://api.stuk.co/media/1693/image/4m83tx2_wermlands-logo-ht24.png"
     },
     {
-        "id": 14,
         "name": "Östgöta Nation",
         "address": "Adelgatan 4, Lund, Sweden",
         "latitude": 55.70451,
         "longitude": 13.19814,
-        "stuk_id": 2711
+        "stuk_id": 2711,
+        "icon": "https://api.stuk.co/media/78/image/pbl1qjg_ostgota_nation_logo_rund.png"
     }
 ]
