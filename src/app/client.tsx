@@ -100,7 +100,7 @@ export default function Client({ organizations = [] }: ClientProps) {
             />
 
             {/* Events Section */}
-            <div>
+            <div className="mb-100">
               <h3 className="text-lg font-semibold mb-4 text-gray-900">{selectedFilter.label}</h3>
               {eventsForDrawer.length > 0 ? (
                 <div className="space-y-4">

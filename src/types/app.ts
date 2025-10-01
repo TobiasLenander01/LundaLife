@@ -6,6 +6,7 @@ export interface CustomMarker {
   lat: number;
   lng: number;
   title?: string;
+  icon?: string;
   glyph?: ReactNode;
   onClick?: () => void;
 }

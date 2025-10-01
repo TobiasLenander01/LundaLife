@@ -1,4 +1,5 @@
 import { Organization } from '@/types/app';
+import Image from 'next/image';
 import { FiMapPin } from 'react-icons/fi';
 
 interface OrganizationProps {
@@ -11,10 +12,12 @@ export default function OrganizationComponent({ organization }: OrganizationProp
             {/* Organization Icon */}
             <div className="flex-shrink-0">
                 {organization.icon ? (
-                    <img 
+                    <Image 
                         src={organization.icon} 
                         alt={`${organization.name} logo`}
-                        className="w-16 h-16 rounded-full object-cover"
+                        width={64}
+                        height={64}
+                        className="rounded-full object-cover"
                         onError={(e) => {
                             // Fallback to initials if image fails to load
                             e.currentTarget.style.display = 'none';

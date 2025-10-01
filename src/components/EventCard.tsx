@@ -1,5 +1,6 @@
 import { Event } from '@/types/app';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FiCalendar, FiMapPin, FiExternalLink } from 'react-icons/fi';
 
 interface EventCardProps {
@@ -47,10 +48,11 @@ export default function EventCard({ event, className = '' }: EventCardProps) {
             {/* Event Image */}
             {event.image && (
                 <div className="relative h-48 w-full">
-                    <img 
+                    <Image 
                         src={event.image} 
                         alt={event.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                         onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';

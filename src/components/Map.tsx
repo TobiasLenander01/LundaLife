@@ -1,6 +1,7 @@
 'use client';
 
-import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import Image from 'next/image';
 import { CustomMarker } from '@/types/app';
 
 export interface MapComponentProps {
@@ -55,11 +56,26 @@ export default function MapComponent({
                             position={{ lat: marker.lat, lng: marker.lng }}
                             onClick={marker.onClick}
                         >
-                            <Pin
-                                background={"#0C253E"}
-                                glyphColor={"#ffffff"}
-                                borderColor={"#0C253E"}
-                            />
+                            {marker.glyph ? (
+                                marker.glyph
+                            ) : (
+                                <div className="bg-white rounded-full shadow-lg border-2 border-blue-900 flex items-center justify-center">
+                                    {/* Use organization icon if available, otherwise show organization initials */}
+                                    {marker.icon ? (
+                                        <Image 
+                                            src={marker.icon} 
+                                            alt={marker.title || 'Organization'} 
+                                            width={40}
+                                            height={40}
+                                            className="rounded-full"
+                                        />
+                                    ) : (
+                                        <div className="w-6 h-6 bg-blue-900 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                            {marker.title?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 'ORG'}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </AdvancedMarker>
                     ))}
 
