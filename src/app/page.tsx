@@ -5,6 +5,6 @@ export default async function Server() {
   // Fetch organizations from the STUK API
   const organizations = await getStukOrganizations();
 
-  // Pass the organizations to the Map component
+  // Pass the organizations to the client component
   return <Client organizations={organizations} />;
 }

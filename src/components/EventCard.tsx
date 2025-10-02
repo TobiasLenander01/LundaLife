@@ -1,14 +1,13 @@
 import { Event } from '@/types/app';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiCalendar, FiMapPin, FiExternalLink } from 'react-icons/fi';
+import { FiCalendar, FiMapPin, FiExternalLink, FiClock } from 'react-icons/fi';
 
 interface EventCardProps {
     event: Event;
-    className?: string;
 }
 
-export default function EventCard({ event, className = '' }: EventCardProps) {
+export default function EventCard({ event }: EventCardProps) {
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -20,7 +19,7 @@ export default function EventCard({ event, className = '' }: EventCardProps) {
     };
 
     const formatTime = (dateString: string) => {
-        return new Date(dateString).toLocaleTimeString('en-US', {
+        return new Date(dateString).toLocaleTimeString('sv-SE', {
             hour: '2-digit',
             minute: '2-digit'
         });
@@ -37,14 +36,32 @@ export default function EventCard({ event, className = '' }: EventCardProps) {
         const isSameDay = startDate.toDateString() === endDate.toDateString();
         
         if (isSameDay) {
-            return `${formatDate(event.start_date)} • ${formatTime(event.start_date)} - ${formatTime(event.end_date!)}`;
+            return formatDate(event.start_date);
         } else {
             return `${formatDate(event.start_date)} - ${formatDate(event.end_date!)}`;
         }
     };
 
+    const getTimeRange = () => {
+        const endDate = event.end_date ? new Date(event.end_date) : null;
+        
+        if (!endDate) {
+            return formatTime(event.start_date);
+        }
+        
+        const startDate = new Date(event.start_date);
+        const isSameDay = startDate.toDateString() === endDate.toDateString();
+        
+        if (isSameDay) {
+            return `${formatTime(event.start_date)} - ${formatTime(event.end_date!)}`;
+        } else {
+            // For multi-day events, show start time on first day
+            return formatTime(event.start_date);
+        }
+    };
+
     return (
-        <div className={`bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 mb-6 ${className}`}>
+        <div className={`bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 mb-6`}>
             {/* Event Image */}
             {event.image && (
                 <div className="relative h-48 w-full">
@@ -69,10 +86,16 @@ export default function EventCard({ event, className = '' }: EventCardProps) {
                     </h3>
                 </div>
 
-                {/* Date and Time */}
+                {/* Date */}
                 <div className="flex items-center mb-3 text-gray-600">
                     <FiCalendar className="h-4 w-4" />
                     <span className="text-sm font-medium ml-2">{getDateRange()}</span>
+                </div>
+
+                {/* Time */}
+                <div className="flex items-center mb-3 text-gray-600">
+                    <FiClock className="h-4 w-4" />
+                    <span className="text-sm ml-2">{getTimeRange()}</span>
                 </div>
 
                 {/* Address */}

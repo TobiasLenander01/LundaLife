@@ -63,6 +63,12 @@ export function isThisMonth(dateStr: string): boolean {
   );
 }
 
+/**
+ * Filters organizations based on whether they have events matching the selected filter
+ * @param organizations - Array of organizations with events
+ * @param selectedFilter - The selected filter option
+ * @returns Filtered array of organizations
+ */
 export function filterOrganizations(organizations: Organization[], selectedFilter: FilterOption): Organization[] {
   return organizations.filter(organization => {
     return organization.events?.some(
@@ -82,6 +88,12 @@ export function filterOrganizations(organizations: Organization[], selectedFilte
   });
 }
 
+/**
+ * Filters events based on the selected filter option
+ * @param events - Array of events to filter
+ * @param selectedFilter - The selected filter option
+ * @returns Filtered array of events
+ */
 export function filterEvents(events: Event[], selectedFilter: FilterOption): Event[] {
   return events.filter(event => {
     switch (selectedFilter.value) {
