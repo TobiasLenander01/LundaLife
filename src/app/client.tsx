@@ -5,7 +5,7 @@ import Map from '@/components/Map';
 import Drawer from '@/components/Drawer';
 import EventCard from '@/components/EventCard';
 import OrganizationComponent from '@/components/Organization';
-import { isToday, isThisWeek, isThisMonth } from '@/lib/helpers';
+import { filterOrganizations, filterEvents } from '@/lib/helpers';
 import { Organization } from '@/types/app';
 import { CustomMarker, FilterOption, FilterOptions } from '@/types/app';
 import { useState, useMemo } from 'react';
@@ -18,51 +18,17 @@ export default function Client({ organizations = [] }: ClientProps) {
   // State variables to manage selected filter and organization
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>(FilterOptions[0]);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
-
-  // Memoize the filtered list of organizations.
-  const filteredOrganizations = useMemo(() => {
-    // Helper to check if an org has an event matching a date condition.
-    const hasMatchingEvent = (org: Organization, dateCheckFn: (dateStr: string) => boolean) => {
-      if (!org.events || org.events.length === 0) {
-        return false;
-      }
-      return org.events.some(event => dateCheckFn(event.start_date));
-    };
-
-    switch (selectedFilter.value) {
-      case 'today':
-        return organizations.filter(org => hasMatchingEvent(org, isToday));
-      case 'this-week':
-        return organizations.filter(org => hasMatchingEvent(org, isThisWeek));
-      case 'this-month':
-        return organizations.filter(org => hasMatchingEvent(org, isThisMonth));
-      default:
-        return organizations;
-    }
-  }, [organizations, selectedFilter]);
-
-  // Memoize the list of events to show in the drawer, filtered by the selected time period.
-  const eventsForDrawer = useMemo(() => {
-    if (!selectedOrganization || !selectedOrganization.events) return [];
-
-    const dateCheckFn = {
-      'today': isToday,
-      'this-week': isThisWeek,
-      'this-month': isThisMonth,
-    }[selectedFilter.value];
-
-    if (dateCheckFn) {
-      return selectedOrganization.events.filter(event => dateCheckFn(event.start_date));
-    }
-
-    // if no filter matches, show all events for the selected org
-    return selectedOrganization.events;
-  }, [selectedOrganization, selectedFilter]);
-
-  // Function to handle filter change
-  const handleFilterChange = (filterValue: FilterOption) => {
-    setSelectedFilter(filterValue);
-  };
+  
+  // Use useMemo to cache result and recalculate only when dependencies change
+  const filteredOrganizations = useMemo(() => 
+    filterOrganizations(organizations, selectedFilter), 
+    [organizations, selectedFilter]
+  );
+  
+  const filteredEvents = useMemo(() => 
+    filterEvents(selectedOrganization?.events ?? [], selectedFilter), 
+    [selectedOrganization?.events, selectedFilter]
+  );
 
   // Create custom markers for the map based on organizations
   const markers: CustomMarker[] = filteredOrganizations.map((org) => ({
@@ -74,24 +40,17 @@ export default function Client({ organizations = [] }: ClientProps) {
     onClick: () => setSelectedOrganization(org),
   }));
 
-  // Function to handle drawer close event
-  const handleDrawerClose = (isOpen: boolean) => {
-    if (!isOpen) {
-      setSelectedOrganization(null);
-    }
-  };
-
   return (
     <div className="flex flex-col h-screen">
 
       {/* Render Header component with logo and filter drop down menu */}
-      <Header selectedFilter={selectedFilter} handleFilterChange={handleFilterChange} />
+      <Header selectedFilter={selectedFilter} handleFilterChange={(filterValue: FilterOption) => setSelectedFilter(filterValue)} />
 
       {/* Render Google Map with markers for the organizations */}
       <Map markers={markers} />
 
       {/* Drawer for displaying organization details */}
-      <Drawer open={!!selectedOrganization} onOpenChange={handleDrawerClose}>
+      <Drawer open={!!selectedOrganization} onOpenChange={() => {setSelectedOrganization(null)}}>
         {selectedOrganization && (
           <div className="space-y-6">
             {/* Organization Info */}
@@ -102,9 +61,9 @@ export default function Client({ organizations = [] }: ClientProps) {
             {/* Events Section */}
             <div className="mb-100">
               <h3 className="text-lg font-semibold mb-4 text-gray-900">{selectedFilter.label}</h3>
-              {eventsForDrawer.length > 0 ? (
+              {filteredEvents.length > 0 ? (
                 <div className="space-y-4">
-                  {eventsForDrawer.map((event) => (
+                  {filteredEvents.map((event) => (
                     <EventCard event={event} key={event.id} />
                   ))}
                 </div>
