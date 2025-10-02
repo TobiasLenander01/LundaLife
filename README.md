@@ -1,6 +1,8 @@
+# LundaLife
+
 ## About
 
-A next js app that loads events from the STUK API and displays them on a google map. Users can filter events by organization and view event details.
+A next js app that loads events from the STUK API and displays them on a google map. Users can filter events by organization and view event details. Visit [LundaLife](https://lundalife.netlify.app/) to explore events in Lund, Sweden.
 
 ## License
 
