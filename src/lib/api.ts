@@ -59,15 +59,33 @@ async function getStukEvents(json: StukEventData[]): Promise<Event[]> {
         // Loop through each occurrence
         for (const occurrence of occurrences) {
             
-            // Get occurrence date
+            // Get occurrence date and convert from UTC to local Swedish time
             const startDate = occurrence.start_date;
 
             // Check if there is a startDate
             if (startDate == null)
                 continue;
 
+            // Convert UTC date to local Swedish time by treating UTC components as local
+            const convertUtcToLocal = (utcDateString: string): string => {
+                const utcDate = new Date(utcDateString);
+                const year = utcDate.getUTCFullYear();
+                const month = utcDate.getUTCMonth();
+                const day = utcDate.getUTCDate();
+                const hours = utcDate.getUTCHours();
+                const minutes = utcDate.getUTCMinutes();
+                const seconds = utcDate.getUTCSeconds();
+                
+                // Create local date with the same time components
+                const localDate = new Date(year, month, day, hours, minutes, seconds);
+                return localDate.toISOString();
+            };
+
+            const localStartDate = convertUtcToLocal(startDate);
+            const localEndDate = occurrence.end_date ? convertUtcToLocal(occurrence.end_date) : null;
+
             // Check if event has already happened
-            const eventDate = new Date(startDate);
+            const eventDate = new Date(localStartDate);
             const currentDate = new Date();
 
             // Only include future events (or events happening today)
@@ -75,7 +93,7 @@ async function getStukEvents(json: StukEventData[]): Promise<Event[]> {
                 continue;
 
             // Create unique ID by combining event ID with start date to handle multiple occurrences
-            const uniqueId = `${eventData.id}-${startDate}`;
+            const uniqueId = `${eventData.id}-${localStartDate}`;
             
             // Create the event object
             const event: Event = {
@@ -85,8 +103,8 @@ async function getStukEvents(json: StukEventData[]): Promise<Event[]> {
                 address: `${occurrence.street_address || ''}, ${occurrence.zip_code || ''}, ${occurrence.city || ''}`.trim(),
                 image: eventData.image_url || null,
                 link: occurrence.deep_link || eventData.url || null,
-                start_date: startDate,
-                end_date: occurrence.end_date || null,
+                start_date: localStartDate,
+                end_date: localEndDate,
             };
 
             // Add to list of events
