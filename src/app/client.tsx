@@ -25,10 +25,11 @@ export default function Client({ organizations = [] }: ClientProps) {
     [organizations, selectedFilter]
   );
   
-  const filteredEvents = useMemo(() => 
-    filterEvents(selectedOrganization?.events ?? [], selectedFilter), 
-    [selectedOrganization?.events, selectedFilter]
-  );
+  const filteredEvents = useMemo(() => {
+    const filtered = filterEvents(selectedOrganization?.events ?? [], selectedFilter);
+    // Sort events in chronological order (earliest first)
+    return filtered.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+  }, [selectedOrganization?.events, selectedFilter]);
 
   // Create custom markers for the map based on organizations
   const markers: CustomMarker[] = filteredOrganizations.map((org) => ({

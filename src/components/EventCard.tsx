@@ -100,10 +100,10 @@ export default function EventCard({ event, className = '' }: EventCardProps) {
                             href={event.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                            className="inline-flex items-center px-4 py-2 text-blue-700 text-sm font-medium"
                         >
                             <FiExternalLink className="h-4 w-4" />
-                            <span className="ml-2">Learn More</span>
+                            <span className="ml-2">Details</span>
                         </Link>
                     </div>
                 )}

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "LundaLife",
-  description: "Made by Tobias Lenander and Victor Karlström",
+  description: "Made by Tobias Lenander",
 };
 
 export default function RootLayout({
