@@ -39,6 +39,7 @@ export interface Event {
   name: string;
   description: string | null;
   address: string | null;
+  category: string | null;
   image: string | null;
   link: string | null;
   start_date: string;

@@ -108,3 +108,50 @@ export function filterEvents(events: Event[], selectedFilter: FilterOption): Eve
     }
   });
 }
+
+export function determineEventCategory(event: Event): string | null {
+  // Define categories with keywords
+  const categories = [
+    { label: "Breakfast", probability: 0, keywords: ['frukost'] },
+    { label: "Lunch", probability: 0, keywords: ['lunch', 'brunch', 'food'] },
+    { label: "Bar", probability: 0, keywords: ['bar', 'pub'] },
+    { label: "Club", probability: 0, keywords: ['klubb', 'disco', 'dj'] }
+  ];
+
+  if (event.description) {
+    const description = event.description.toLowerCase();
+    for (const category of categories) {
+      for (const keyword of category.keywords) {
+        if (description.includes(keyword)) {
+          category.probability++;
+        }
+      }
+    }
+  }
+
+  const startHour = new Date(event.start_date).getHours();
+  if (startHour == 12) {
+    // If the event starts at noon, increase probability for Lunch
+    categories.find(category => category.label === "Lunch")!.probability++;
+  } else if (startHour >= 18) {
+    // If the event starts in the evening, increase probability for Bar and Club
+    categories.find(category => category.label === "Bar")!.probability++;
+    categories.find(category => category.label === "Club")!.probability++;
+  } else if (startHour < 12) {
+    // If the event starts in the morning, increase probability for Breakfast
+    categories.find(category => category.label === "Breakfast")!.probability++;
+  }
+
+  // Set minimum threshold for category assignment
+  const MINIMUM_THRESHOLD = 2;
+
+  // Sort categories by probability
+  categories.sort((a, b) => b.probability - a.probability);
+
+  // Return the category with the highest probability if above threshold
+  if (categories[0].probability >= MINIMUM_THRESHOLD) {
+    return categories[0].label;
+  } else {
+    return 'Other'; // No category assigned
+  }
+}

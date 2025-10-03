@@ -18,6 +18,31 @@ export default function EventCard({ event }: EventCardProps) {
         });
     };
 
+    const getCategoryBadge = () => {
+        if (!event.category) return null;
+
+        const getCategoryStyles = (category: string) => {
+            switch (category.toLowerCase()) {
+                case 'breakfast':
+                    return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                case 'lunch':
+                    return 'bg-green-100 text-green-800 border-green-200';
+                case 'bar':
+                    return 'bg-purple-100 text-purple-800 border-purple-200';
+                case 'club':
+                    return 'bg-pink-100 text-pink-800 border-pink-200';
+                default:
+                    return 'bg-gray-100 text-gray-800 border-gray-200';
+            }
+        };
+
+        return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium border ${getCategoryStyles(event.category)}`}>
+                {event.category}
+            </span>
+        );
+    };
+
     const formatTime = (dateString: string) => {
         return new Date(dateString).toLocaleTimeString('sv-SE', {
             hour: '2-digit',
@@ -79,11 +104,14 @@ export default function EventCard({ event }: EventCardProps) {
             )}
             
             <div className="p-6">
-                {/* Event Header */}
+                {/* Event Header with Category */}
                 <div className="mb-3">
-                    <h3 className="text-xl font-bold text-gray-900 leading-tight">
-                        {event.name}
-                    </h3>
+                    <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-xl font-bold text-gray-900 leading-tight flex-1 mr-3">
+                            {event.name}
+                        </h3>
+                        {getCategoryBadge()}
+                    </div>
                 </div>
 
                 {/* Date */}

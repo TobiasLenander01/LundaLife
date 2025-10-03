@@ -1,6 +1,7 @@
 import { Organization, Event, StukEventData } from "@/types/app";
 import organizationsData from "./organizations.json";
 import { load as htmlLoad } from 'cheerio';
+import { determineEventCategory } from "./helpers";
 
 export async function getStukOrganizations(): Promise<Organization[]> {
 
@@ -103,9 +104,13 @@ async function getStukEvents(json: StukEventData[]): Promise<Event[]> {
                 address: `${occurrence.street_address || ''}, ${occurrence.zip_code || ''}, ${occurrence.city || ''}`.trim(),
                 image: eventData.image_url || null,
                 link: occurrence.deep_link || eventData.url || null,
+                category: null, // Will be determined later
                 start_date: localStartDate,
                 end_date: localEndDate,
             };
+
+            // Determine and assign category based on description
+            event.category = determineEventCategory(event);
 
             // Add to list of events
             events.push(event);
