@@ -17,14 +17,15 @@ export interface FilterOption {
 }
 
 export const DateFilterOptions: FilterOption[] = [
-  { value: 'today', label: 'Events today' },
-  { value: 'this-week', label: 'Events this week' },
-  { value: 'this-month', label: 'Events this month' },
-  { value: 'all', label: 'All events' },
+  { value: 'today', label: 'Today' },
+  { value: 'this-week', label: 'This Week' },
+  { value: 'next-week', label: 'Next Week' },
+  { value: 'this-month', label: 'This Month' },
+  { value: 'all', label: 'All Time' },
 ];
 
 export const CategoryFilterOptions: FilterOption[] = [
-  { value: 'all', label: 'All categories' },
+  { value: 'all', label: 'All Events' },
   { value: 'breakfast', label: 'Breakfast' },
   { value: 'lunch', label: 'Lunch' },
   { value: 'bar', label: 'Bar' },

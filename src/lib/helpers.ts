@@ -47,6 +47,30 @@ export function isThisWeek(dateStr: string): boolean {
 }
 
 /**
+ * Checks if a date string represents a date within next week
+ * @param dateStr - Date string in ISO format
+ * @returns true if the date is within next week
+ */
+export function isNextWeek(dateStr: string): boolean {
+  if (!dateStr) return false;
+
+  const date = new Date(dateStr);
+  const today = new Date();
+
+  // Get the start of next week (Sunday of next week)
+  const startOfNextWeek = new Date(today);
+  startOfNextWeek.setDate(today.getDate() - today.getDay() + 7);
+  startOfNextWeek.setHours(0, 0, 0, 0);
+
+  // Get the end of next week (Saturday of next week)
+  const endOfNextWeek = new Date(startOfNextWeek);
+  endOfNextWeek.setDate(startOfNextWeek.getDate() + 6);
+  endOfNextWeek.setHours(23, 59, 59, 999);
+
+  return date >= startOfNextWeek && date <= endOfNextWeek;
+}
+
+/**
  * Checks if a date string represents a date within this month
  * @param dateStr - Date string in ISO format
  * @returns true if the date is within this month
@@ -96,6 +120,8 @@ export function matchesDateFilter(event: Event, dateFilter: FilterOption): boole
       return isToday(event.start_date);
     case 'this-week':
       return isThisWeek(event.start_date);
+    case 'next-week':
+      return isNextWeek(event.start_date);
     case 'this-month':
       return isThisMonth(event.start_date);
     default:

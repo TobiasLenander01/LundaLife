@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
 export interface DropdownOption {
   value: string;
@@ -44,6 +44,7 @@ export default function Dropdown({
 
   const handleSelectOption = (option: DropdownOption) => {
     onSelect(option);
+    onToggle(); // Close the dropdown after selecting an option
   };
 
   return (

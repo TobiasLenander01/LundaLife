@@ -39,10 +39,15 @@ export default function Header({ filterState, handleFilterChange }: HeaderCompon
     <header className="bg-white shadow-md px-6 py-4 sticky top-0 z-50 flex items-center select-none">
       <div className="container mx-auto flex justify-between items-center">
         
-        {/* Logo and name */}
-        <div className="flex items-center space-x-3">
+        {/* Logo and name - hidden on small screens */}
+        <div className="hidden sm:flex items-center space-x-3">
           <Image src="/images/logo.png" alt="LundaLife Logo" width={48} height={48}/> 
           <span className="text-xl font-semibold text-gray-800">LundaLife</span>
+        </div>
+        
+        {/* Logo only on mobile */}
+        <div className="flex sm:hidden items-center">
+          <Image src="/images/logo.png" alt="LundaLife Logo" width={32} height={32}/>
         </div>
 
         {/* Filter Section */}
