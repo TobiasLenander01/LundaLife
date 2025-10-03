@@ -2,7 +2,7 @@
  * Helper functions for date filtering
  */
 
-import { Event, FilterOption, Organization } from "@/types/app";
+import { Event, FilterOption, Organization, FilterState } from "@/types/app";
 
 /**
  * Checks if a date string represents today
@@ -64,49 +64,71 @@ export function isThisMonth(dateStr: string): boolean {
 }
 
 /**
- * Filters organizations based on whether they have events matching the selected filter
+ * Checks if an event matches the category filter
+ * @param event - The event to check
+ * @param categoryFilter - The category filter to apply
+ * @returns true if the event matches the category filter
+ */
+export function matchesCategoryFilter(event: Event, categoryFilter: FilterOption): boolean {
+  if (categoryFilter.value === 'all') return true;
+  
+  const eventCategory = event.category?.toLowerCase() || 'other';
+  const filterValue = categoryFilter.value.toLowerCase();
+  
+  if (filterValue === 'other') {
+    // For "other" category, include events with null/undefined category or categories not in our predefined list
+    const predefinedCategories = ['breakfast', 'lunch', 'bar', 'club'];
+    return eventCategory === 'other' || !predefinedCategories.includes(eventCategory);
+  }
+  
+  return eventCategory === filterValue;
+}
+
+/**
+ * Checks if an event matches the date filter
+ * @param event - The event to check
+ * @param dateFilter - The date filter to apply
+ * @returns true if the event matches the date filter
+ */
+export function matchesDateFilter(event: Event, dateFilter: FilterOption): boolean {
+  switch (dateFilter.value) {
+    case 'today':
+      return isToday(event.start_date);
+    case 'this-week':
+      return isThisWeek(event.start_date);
+    case 'this-month':
+      return isThisMonth(event.start_date);
+    default:
+      return true; // 'all' or unrecognized filter shows all events
+  }
+}
+
+/**
+ * Filters organizations based on whether they have events matching the selected filters
  * @param organizations - Array of organizations with events
- * @param selectedFilter - The selected filter option
+ * @param filterState - The filter state containing both date and category filters
  * @returns Filtered array of organizations
  */
-export function filterOrganizations(organizations: Organization[], selectedFilter: FilterOption): Organization[] {
+export function filterOrganizations(organizations: Organization[], filterState: FilterState): Organization[] {
   return organizations.filter(organization => {
-    return organization.events?.some(
-      event => {
-        switch (selectedFilter.value) {
-          case 'today':
-            return isToday(event.start_date);
-          case 'this-week':
-            return isThisWeek(event.start_date);
-          case 'this-month':
-            return isThisMonth(event.start_date);
-          default:
-            return true;
-        }
-      }
+    return organization.events?.some(event => 
+      matchesDateFilter(event, filterState.dateFilter) && 
+      matchesCategoryFilter(event, filterState.categoryFilter)
     );
   });
 }
 
 /**
- * Filters events based on the selected filter option
+ * Filters events based on the selected filter options
  * @param events - Array of events to filter
- * @param selectedFilter - The selected filter option
+ * @param filterState - The filter state containing both date and category filters
  * @returns Filtered array of events
  */
-export function filterEvents(events: Event[], selectedFilter: FilterOption): Event[] {
-  return events.filter(event => {
-    switch (selectedFilter.value) {
-      case 'today':
-        return isToday(event.start_date);
-      case 'this-week':
-        return isThisWeek(event.start_date);
-      case 'this-month':
-        return isThisMonth(event.start_date);
-      default:
-        return true; // 'all' or unrecognized filter shows all events
-    }
-  });
+export function filterEvents(events: Event[], filterState: FilterState): Event[] {
+  return events.filter(event => 
+    matchesDateFilter(event, filterState.dateFilter) && 
+    matchesCategoryFilter(event, filterState.categoryFilter)
+  );
 }
 
 export function determineEventCategory(event: Event): string | null {

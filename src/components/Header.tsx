@@ -1,25 +1,41 @@
-import { useState, useRef } from 'react';
-import { FilterOption, FilterOptions } from '@/types/app';
+import { useState } from 'react';
+import { FilterOption, DateFilterOptions, CategoryFilterOptions, FilterState } from '@/types/app';
+import Dropdown from './Dropdown';
 import Image from 'next/image';
 
 export interface HeaderComponentProps {
-  selectedFilter: FilterOption;
-  handleFilterChange: (filter: FilterOption) => void;
+  filterState: FilterState;
+  handleFilterChange: (filterState: FilterState) => void;
 }
 
-export default function Header({selectedFilter, handleFilterChange }: HeaderComponentProps) {
-  // State to manage dropdown visibility
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+type OpenDropdown = 'none' | 'category' | 'date';
 
-  // Function to handle filter selection
-  const handleSelectFilter = (option: FilterOption) => {
-    handleFilterChange(option);
-    setIsDropdownOpen(false);
+export default function Header({ filterState, handleFilterChange }: HeaderComponentProps) {
+  // State to manage which dropdown is open (only one at a time)
+  const [openDropdown, setOpenDropdown] = useState<OpenDropdown>('none');
+
+  // Function to handle date filter selection
+  const handleSelectDateFilter = (option: FilterOption) => {
+    handleFilterChange({
+      ...filterState,
+      dateFilter: option
+    });
+  };
+
+  // Function to handle category filter selection
+  const handleSelectCategoryFilter = (option: FilterOption) => {
+    handleFilterChange({
+      ...filterState,
+      categoryFilter: option
+    });
+  };
+
+  // Function to toggle dropdowns with mutual exclusivity
+  const toggleDropdown = (dropdown: 'category' | 'date') => {
+    setOpenDropdown(prevOpen => prevOpen === dropdown ? 'none' : dropdown);
   };
 
   return (
-    
     <header className="bg-white shadow-md px-6 py-4 sticky top-0 z-50 flex items-center select-none">
       <div className="container mx-auto flex justify-between items-center">
         
@@ -31,49 +47,23 @@ export default function Header({selectedFilter, handleFilterChange }: HeaderComp
 
         {/* Filter Section */}
         <div className="flex items-center space-x-3">
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md inline-flex items-center transition-colors duration-150 ease-in-out"
-              aria-haspopup="true"
-              aria-expanded={isDropdownOpen}
-            >
-              <span>{selectedFilter.label}</span>
-              <svg
-                className={`ml-2 h-4 w-4 transform transition-transform duration-200 ${
-                  isDropdownOpen ? 'rotate-180' : 'rotate-0'
-                }`}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
+          {/* Category Filter Dropdown */}
+          <Dropdown
+            options={CategoryFilterOptions}
+            selectedOption={filterState.categoryFilter}
+            onSelect={handleSelectCategoryFilter}
+            isOpen={openDropdown === 'category'}
+            onToggle={() => toggleDropdown('category')}
+          />
 
-            {isDropdownOpen && (
-              <ul
-                className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-20"
-                role="menu"
-              >
-                {FilterOptions.map((option) => (
-                  <li key={option.value}>
-                    <button
-                      onClick={() => handleSelectFilter(option)}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                      role="menuitem"
-                    >
-                      {option.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          {/* Date Filter Dropdown */}
+          <Dropdown
+            options={DateFilterOptions}
+            selectedOption={filterState.dateFilter}
+            onSelect={handleSelectDateFilter}
+            isOpen={openDropdown === 'date'}
+            onToggle={() => toggleDropdown('date')}
+          />
         </div>
       </div>
     </header>

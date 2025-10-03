@@ -7,7 +7,7 @@ import EventCard from '@/components/EventCard';
 import OrganizationComponent from '@/components/Organization';
 import { filterOrganizations, filterEvents } from '@/lib/helpers';
 import { Organization } from '@/types/app';
-import { CustomMarker, FilterOption, FilterOptions } from '@/types/app';
+import { CustomMarker, DateFilterOptions, CategoryFilterOptions, FilterState } from '@/types/app';
 import { useState, useMemo } from 'react';
 
 interface ClientProps {
@@ -15,21 +15,24 @@ interface ClientProps {
 }
 
 export default function Client({ organizations = [] }: ClientProps) {
-  // State variables to manage selected filter and organization
-  const [selectedFilter, setSelectedFilter] = useState<FilterOption>(FilterOptions[0]);
+  // State variables to manage filter state and organization
+  const [filterState, setFilterState] = useState<FilterState>({
+    dateFilter: DateFilterOptions[0],
+    categoryFilter: CategoryFilterOptions[0]
+  });
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
   
   // Use useMemo to cache result and recalculate only when dependencies change
   const filteredOrganizations = useMemo(() => 
-    filterOrganizations(organizations, selectedFilter), 
-    [organizations, selectedFilter]
+    filterOrganizations(organizations, filterState), 
+    [organizations, filterState]
   );
   
   const filteredEvents = useMemo(() => {
-    const filtered = filterEvents(selectedOrganization?.events ?? [], selectedFilter);
+    const filtered = filterEvents(selectedOrganization?.events ?? [], filterState);
     // Sort events in chronological order (earliest first)
     return filtered.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
-  }, [selectedOrganization?.events, selectedFilter]);
+  }, [selectedOrganization?.events, filterState]);
 
   // Create custom markers for the map based on organizations
   const markers: CustomMarker[] = filteredOrganizations.map((org) => ({
@@ -45,7 +48,7 @@ export default function Client({ organizations = [] }: ClientProps) {
     <div className="flex flex-col h-screen">
 
       {/* Render Header component with logo and filter drop down menu */}
-      <Header selectedFilter={selectedFilter} handleFilterChange={(filterValue: FilterOption) => setSelectedFilter(filterValue)} />
+      <Header filterState={filterState} handleFilterChange={setFilterState} />
 
       {/* Render Google Map with markers for the organizations */}
       <Map markers={markers} />
@@ -61,7 +64,11 @@ export default function Client({ organizations = [] }: ClientProps) {
 
             {/* Events Section */}
             <div className="mb-100">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">{selectedFilter.label}</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">
+                {filterState.categoryFilter.value === 'all' 
+                  ? filterState.dateFilter.label 
+                  : `${filterState.categoryFilter.label} - ${filterState.dateFilter.label}`}
+              </h3>
               {filteredEvents.length > 0 ? (
                 <div className="space-y-4">
                   {filteredEvents.map((event) => (

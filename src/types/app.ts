@@ -16,12 +16,26 @@ export interface FilterOption {
   label: string;
 }
 
-export const FilterOptions: FilterOption[] = [
+export const DateFilterOptions: FilterOption[] = [
   { value: 'today', label: 'Events today' },
   { value: 'this-week', label: 'Events this week' },
   { value: 'this-month', label: 'Events this month' },
   { value: 'all', label: 'All events' },
 ];
+
+export const CategoryFilterOptions: FilterOption[] = [
+  { value: 'all', label: 'All categories' },
+  { value: 'breakfast', label: 'Breakfast' },
+  { value: 'lunch', label: 'Lunch' },
+  { value: 'bar', label: 'Bar' },
+  { value: 'club', label: 'Club' },
+  { value: 'other', label: 'Other' },
+];
+
+export interface FilterState {
+  dateFilter: FilterOption;
+  categoryFilter: FilterOption;
+}
 
 export interface Organization {
   name: string;
