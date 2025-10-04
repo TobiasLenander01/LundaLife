@@ -40,12 +40,13 @@ export interface FilterState {
 }
 
 export interface Organization {
+  id: number,
+  stuk_id?: number | null;
+  fb_id?: number | null;
   name: string;
   address: string;
   latitude: number;
   longitude: number;
-  stuk_id: number;
-  fb_id?: number | null;
   icon?: string | null;
   events?: Event[];
 };

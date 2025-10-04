@@ -114,16 +114,16 @@ export function isThisMonth(dateStr: string): boolean {
  */
 export function matchesCategoryFilter(event: Event, categoryFilter: FilterOption): boolean {
   if (categoryFilter.value === 'all') return true;
-  
+
   const eventCategory = event.category?.toLowerCase() || 'other';
   const filterValue = categoryFilter.value.toLowerCase();
-  
+
   if (filterValue === 'other') {
     // For "other" category, include events with null/undefined category or categories not in our predefined list
     const predefinedCategories = ['breakfast', 'lunch', 'bar', 'club'];
     return eventCategory === 'other' || !predefinedCategories.includes(eventCategory);
   }
-  
+
   return eventCategory === filterValue;
 }
 
@@ -158,8 +158,8 @@ export function matchesDateFilter(event: Event, dateFilter: FilterOption): boole
  */
 export function filterOrganizations(organizations: Organization[], filterState: FilterState): Organization[] {
   return organizations.filter(organization => {
-    return organization.events?.some(event => 
-      matchesDateFilter(event, filterState.dateFilter) && 
+    return organization.events?.some(event =>
+      matchesDateFilter(event, filterState.dateFilter) &&
       matchesCategoryFilter(event, filterState.categoryFilter)
     );
   });
@@ -172,8 +172,8 @@ export function filterOrganizations(organizations: Organization[], filterState: 
  * @returns Filtered array of events
  */
 export function filterEvents(events: Event[], filterState: FilterState): Event[] {
-  return events.filter(event => 
-    matchesDateFilter(event, filterState.dateFilter) && 
+  return events.filter(event =>
+    matchesDateFilter(event, filterState.dateFilter) &&
     matchesCategoryFilter(event, filterState.categoryFilter)
   );
 }
@@ -223,4 +223,122 @@ export function determineEventCategory(event: Event): string | null {
   } else {
     return 'Other'; // No category assigned
   }
+}
+
+/**
+ * Fetches HTML content from a URL with browser-like headers
+ * @param url - The URL to fetch HTML from
+ * @returns Promise that resolves to HTML string or null if error
+ */
+export async function getHtml(url: string): Promise<string | null> {
+  // Define headers to mimic a real browser
+  const headers = {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "accept-encoding": "gzip, deflate",
+    "accept-language": "en-US,en;q=0.6",
+    "cache-control": "max-age=0",
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "same-origin",
+    "sec-fetch-user": "?1",
+    "sec-gpc": "1",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+  };
+
+  // Try a GET request
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: headers
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const html = await response.text();
+    return html;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+
+/**
+ * Extracts JSON data from <script type="application/json"> tags in HTML
+ * @param html - HTML string to parse
+ * @returns Array of parsed JSON objects found in script tags
+ */
+export function getJsonFromHtml(html: string): unknown[] {
+  if (!html || typeof html !== 'string') {
+    return [];
+  }
+
+  const jsonData: unknown[] = [];
+  
+  // Regular expression to match <script type="application/json"> tags and their content
+  const scriptRegex = /<script[^>]*type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  
+  let match;
+  while ((match = scriptRegex.exec(html)) !== null) {
+    const jsonContent = match[1].trim();
+    
+    if (jsonContent) {
+      try {
+        const parsedJson = JSON.parse(jsonContent);
+        jsonData.push(parsedJson);
+      } catch (error) {
+        console.warn('Failed to parse JSON from script tag:', error);
+        // Optionally, you can still push the raw content if parsing fails
+        // jsonData.push({ raw: jsonContent, error: error.message });
+      }
+    }
+  }
+  
+  return jsonData;
+}
+
+/**
+ * Recursively searches through a nested object/array structure to find values
+ * at paths that match the specified key path pattern
+ * @param data - The data structure to search through (object or array)
+ * @param keyPath - The path pattern to match, separated by "/" (e.g., "user/profile/name")
+ * @returns Array of values found at matching paths
+ */
+export function jsonFind(data: unknown, keyPath: string): unknown[] {
+  // Split the key_path string into a list of keys
+  const targetPath = keyPath.split("/");
+  
+  // Initialize the result list
+  const results: unknown[] = [];
+
+  // Define a recursive search function
+  function search(obj: unknown, parents: string[]): void {
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      // Handle objects
+      for (const [key, value] of Object.entries(obj)) {
+        const currentParents = [...parents, key];
+        
+        // Check if the end of the current path matches the target path
+        if (currentParents.length >= targetPath.length && 
+            currentParents.slice(-targetPath.length).join("/") === keyPath) {
+          results.push(value);
+        }
+        
+        // Recursively search the value
+        search(value, currentParents);
+      }
+    } else if (Array.isArray(obj)) {
+      // Handle arrays
+      for (const item of obj) {
+        search(item, parents);
+      }
+    }
+  }
+
+  // Start the search
+  search(data, []);
+  return results;
 }

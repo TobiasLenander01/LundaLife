@@ -36,7 +36,7 @@ export default function Client({ organizations = [] }: ClientProps) {
 
   // Create custom markers for the map based on organizations
   const markers: CustomMarker[] = filteredOrganizations.map((org) => ({
-    id: org.stuk_id,
+    id: org.id,
     lat: org.latitude,
     lng: org.longitude,
     title: org.name ?? 'Unnamed Organization',

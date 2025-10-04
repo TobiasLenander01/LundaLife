@@ -7,6 +7,18 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'api.stuk.co',
       },
+      {
+        protocol: 'https',
+        hostname: '*.fbcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent-*.xx.fbcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent.xx.fbcdn.net',
+      },
     ],
   },
 };
