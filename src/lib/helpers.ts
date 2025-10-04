@@ -23,6 +23,25 @@ export function isToday(dateStr: string): boolean {
 }
 
 /**
+ * Checks if a date string represents tomorrow
+ * @param dateStr - Date string in ISO format
+ * @returns true if the date is tomorrow
+ */
+export function isTomorrow(dateStr: string): boolean {
+  if (!dateStr) return false;
+
+  const date = new Date(dateStr);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return (
+    date.getFullYear() === tomorrow.getFullYear() &&
+    date.getMonth() === tomorrow.getMonth() &&
+    date.getDate() === tomorrow.getDate()
+  );
+}
+
+/**
  * Checks if a date string represents a date within this week
  * @param dateStr - Date string in ISO format
  * @returns true if the date is within this week
@@ -118,6 +137,8 @@ export function matchesDateFilter(event: Event, dateFilter: FilterOption): boole
   switch (dateFilter.value) {
     case 'today':
       return isToday(event.start_date);
+    case 'tomorrow':
+      return isTomorrow(event.start_date);
     case 'this-week':
       return isThisWeek(event.start_date);
     case 'next-week':

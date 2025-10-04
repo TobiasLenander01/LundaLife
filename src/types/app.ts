@@ -18,6 +18,7 @@ export interface FilterOption {
 
 export const DateFilterOptions: FilterOption[] = [
   { value: 'today', label: 'Today' },
+  { value: 'tomorrow', label: 'Tomorrow' },
   { value: 'this-week', label: 'This Week' },
   { value: 'next-week', label: 'Next Week' },
   { value: 'this-month', label: 'This Month' },
