@@ -7,7 +7,8 @@ import EventCard from '@/components/EventCard';
 import OrganizationComponent from '@/components/Organization';
 import { filterOrganizations, filterEvents } from '@/lib/helpers';
 import { Organization } from '@/types/app';
-import { CustomMarker, DateFilterOptions, CategoryFilterOptions, FilterState } from '@/types/app';
+import { CustomMarker, FilterState } from '@/types/app';
+import { DateFilterOptions, Categories } from '@/lib/filterOptions';
 import { useState, useMemo } from 'react';
 
 interface ClientProps {
@@ -18,7 +19,7 @@ export default function Client({ organizations = [] }: ClientProps) {
   // State variables to manage filter state and organization
   const [filterState, setFilterState] = useState<FilterState>({
     dateFilter: DateFilterOptions[0],
-    categoryFilter: CategoryFilterOptions[0]
+    categoryFilter: Categories[0]
   });
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
   

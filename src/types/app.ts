@@ -11,32 +11,21 @@ export interface CustomMarker {
   onClick?: () => void;
 }
 
-export interface FilterOption {
+export interface DateFilterOption {
   value: string;
   label: string;
 }
 
-export const DateFilterOptions: FilterOption[] = [
-  { value: 'today', label: 'Today' },
-  { value: 'tomorrow', label: 'Tomorrow' },
-  { value: 'this-week', label: 'This Week' },
-  { value: 'next-week', label: 'Next Week' },
-  { value: 'this-month', label: 'This Month' },
-  { value: 'all', label: 'All Time' },
-];
-
-export const CategoryFilterOptions: FilterOption[] = [
-  { value: 'all', label: 'All Events' },
-  { value: 'breakfast', label: 'Breakfast' },
-  { value: 'lunch', label: 'Lunch' },
-  { value: 'bar', label: 'Bar' },
-  { value: 'club', label: 'Club' },
-  { value: 'other', label: 'Other' },
-];
+export interface Category {
+  value: string;
+  label: string;
+  icon?: ReactNode;
+  keywords?: string[];
+}
 
 export interface FilterState {
-  dateFilter: FilterOption;
-  categoryFilter: FilterOption;
+  dateFilter: DateFilterOption;
+  categoryFilter: Category;
 }
 
 export interface Organization {

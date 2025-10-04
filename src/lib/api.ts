@@ -162,8 +162,6 @@ export async function getFacebookEvents(fb_id: number): Promise<Event[]> {
         return [];
     }
 
-    console.log(`Found ${eventIds.length} Facebook events for page ${fb_id}`);
-
     // Process each event ID
     for (const eventId of eventIds) {
         // Type check and convert unknown to string/number
@@ -176,7 +174,6 @@ export async function getFacebookEvents(fb_id: number): Promise<Event[]> {
             const event = await getFacebookEvent(eventId, fb_id);
             if (event) {
                 events.push(event);
-                console.log(`Retrieved Facebook event: ${event.name}`);
             }
         } catch (error) {
             console.error(`Error processing Facebook event ${eventId}:`, error);

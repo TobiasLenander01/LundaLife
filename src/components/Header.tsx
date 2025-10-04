@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FilterOption, DateFilterOptions, CategoryFilterOptions, FilterState } from '@/types/app';
+import { Category, FilterState } from '@/types/app';
+import { DateFilterOptions, Categories } from '@/lib/filterOptions';
 import Dropdown from './Dropdown';
 import Image from 'next/image';
 
@@ -15,7 +16,7 @@ export default function Header({ filterState, handleFilterChange }: HeaderCompon
   const [openDropdown, setOpenDropdown] = useState<OpenDropdown>('none');
 
   // Function to handle date filter selection
-  const handleSelectDateFilter = (option: FilterOption) => {
+  const handleSelectDateFilter = (option: Category) => {
     handleFilterChange({
       ...filterState,
       dateFilter: option
@@ -23,7 +24,7 @@ export default function Header({ filterState, handleFilterChange }: HeaderCompon
   };
 
   // Function to handle category filter selection
-  const handleSelectCategoryFilter = (option: FilterOption) => {
+  const handleSelectCategoryFilter = (option: Category) => {
     handleFilterChange({
       ...filterState,
       categoryFilter: option
@@ -54,7 +55,7 @@ export default function Header({ filterState, handleFilterChange }: HeaderCompon
         <div className="flex items-center space-x-3">
           {/* Category Filter Dropdown */}
           <Dropdown
-            options={CategoryFilterOptions}
+            options={Categories}
             selectedOption={filterState.categoryFilter}
             onSelect={handleSelectCategoryFilter}
             isOpen={openDropdown === 'category'}

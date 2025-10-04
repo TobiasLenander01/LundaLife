@@ -1,8 +1,9 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, ReactNode } from 'react';
 
 export interface DropdownOption {
   value: string;
   label: string;
+  icon?: ReactNode;
 }
 
 interface DropdownProps {
@@ -55,6 +56,9 @@ export default function Dropdown({
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
+        {selectedOption.icon && (
+          <span className="mr-2">{selectedOption.icon}</span>
+        )}
         <span>{selectedOption.label || placeholder}</span>
         <svg
           className={`ml-2 h-4 w-4 transform transition-transform duration-200 ${
@@ -81,9 +85,12 @@ export default function Dropdown({
             <li key={option.value}>
               <button
                 onClick={() => handleSelectOption(option)}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 flex items-center"
                 role="menuitem"
               >
+                {option.icon && (
+                  <span className="mr-2">{option.icon}</span>
+                )}
                 {option.label}
               </button>
             </li>

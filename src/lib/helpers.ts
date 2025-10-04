@@ -2,7 +2,8 @@
  * Helper functions for date filtering
  */
 
-import { Event, FilterOption, Organization, FilterState } from "@/types/app";
+import { Event, Category, Organization, FilterState } from "@/types/app";
+import { Categories } from "./filterOptions";
 
 /**
  * Checks if a date string represents today
@@ -112,7 +113,7 @@ export function isThisMonth(dateStr: string): boolean {
  * @param categoryFilter - The category filter to apply
  * @returns true if the event matches the category filter
  */
-export function matchesCategoryFilter(event: Event, categoryFilter: FilterOption): boolean {
+export function matchesCategoryFilter(event: Event, categoryFilter: Category): boolean {
   if (categoryFilter.value === 'all') return true;
 
   const eventCategory = event.category?.toLowerCase() || 'other';
@@ -120,7 +121,10 @@ export function matchesCategoryFilter(event: Event, categoryFilter: FilterOption
 
   if (filterValue === 'other') {
     // For "other" category, include events with null/undefined category or categories not in our predefined list
-    const predefinedCategories = ['breakfast', 'lunch', 'bar', 'club'];
+    // Dynamically get predefined categories from Categories array (excluding 'all' and 'other')
+    const predefinedCategories = Categories
+      .filter(cat => cat.value !== 'all' && cat.value !== 'other')
+      .map(cat => cat.value.toLowerCase());
     return eventCategory === 'other' || !predefinedCategories.includes(eventCategory);
   }
 
@@ -133,7 +137,7 @@ export function matchesCategoryFilter(event: Event, categoryFilter: FilterOption
  * @param dateFilter - The date filter to apply
  * @returns true if the event matches the date filter
  */
-export function matchesDateFilter(event: Event, dateFilter: FilterOption): boolean {
+export function matchesDateFilter(event: Event, dateFilter: Category): boolean {
   switch (dateFilter.value) {
     case 'today':
       return isToday(event.start_date);
@@ -179,13 +183,19 @@ export function filterEvents(events: Event[], filterState: FilterState): Event[]
 }
 
 export function determineEventCategory(event: Event): string | null {
-  // Define categories with keywords
-  const categories = [
-    { label: "Breakfast", probability: 0, keywords: ['frukost'] },
-    { label: "Lunch", probability: 0, keywords: ['lunch', 'brunch', 'food'] },
-    { label: "Bar", probability: 0, keywords: ['bar', 'pub'] },
-    { label: "Club", probability: 0, keywords: ['klubb', 'disco', 'dj'] }
-  ];
+
+  // Get categories with keywords from filter options (excluding 'all' and 'other')
+  const categoriesWithKeywords = Categories.filter(
+    option => option.keywords && option.value !== 'all' && option.value !== 'other'
+  );
+
+  // Initialize categories with probability tracking
+  const categories = categoriesWithKeywords.map(option => ({
+    label: option.label,
+    value: option.value,
+    probability: 0,
+    keywords: option.keywords || []
+  }));
 
   if (event.description) {
     const description = event.description.toLowerCase();
@@ -201,14 +211,24 @@ export function determineEventCategory(event: Event): string | null {
   const startHour = new Date(event.start_date).getHours();
   if (startHour == 12) {
     // If the event starts at noon, increase probability for Lunch
-    categories.find(category => category.label === "Lunch")!.probability++;
-  } else if (startHour >= 18) {
-    // If the event starts in the evening, increase probability for Bar and Club
-    categories.find(category => category.label === "Bar")!.probability++;
-    categories.find(category => category.label === "Club")!.probability++;
-  } else if (startHour < 12) {
+    const lunchCategory = categories.find(category => category.value === "lunch");
+    if (lunchCategory) lunchCategory.probability++;
+  }
+  
+  if (startHour >= 18) {
+    // If the event starts in the evening, increase probability for Bar and Club and bike party
+    const barCategory = categories.find(category => category.value === "bar");
+    const clubCategory = categories.find(category => category.value === "club");
+    const bikeCategory = categories.find(category => category.value === "bikeparty");
+    if (barCategory) barCategory.probability++;
+    if (clubCategory) clubCategory.probability++;
+    if (bikeCategory) bikeCategory.probability++;
+  }
+  
+  if (startHour < 12) {
     // If the event starts in the morning, increase probability for Breakfast
-    categories.find(category => category.label === "Breakfast")!.probability++;
+    const breakfastCategory = categories.find(category => category.value === "breakfast");
+    if (breakfastCategory) breakfastCategory.probability++;
   }
 
   // Set minimum threshold for category assignment
@@ -218,10 +238,10 @@ export function determineEventCategory(event: Event): string | null {
   categories.sort((a, b) => b.probability - a.probability);
 
   // Return the category with the highest probability if above threshold
-  if (categories[0].probability >= MINIMUM_THRESHOLD) {
-    return categories[0].label;
+  if (categories[0] && categories[0].probability >= MINIMUM_THRESHOLD) {
+    return categories[0].value;
   } else {
-    return 'Other'; // No category assigned
+    return 'other'; // No category assigned
   }
 }
 
@@ -277,14 +297,14 @@ export function getJsonFromHtml(html: string): unknown[] {
   }
 
   const jsonData: unknown[] = [];
-  
+
   // Regular expression to match <script type="application/json"> tags and their content
   const scriptRegex = /<script[^>]*type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/gi;
-  
+
   let match;
   while ((match = scriptRegex.exec(html)) !== null) {
     const jsonContent = match[1].trim();
-    
+
     if (jsonContent) {
       try {
         const parsedJson = JSON.parse(jsonContent);
@@ -296,7 +316,7 @@ export function getJsonFromHtml(html: string): unknown[] {
       }
     }
   }
-  
+
   return jsonData;
 }
 
@@ -310,7 +330,7 @@ export function getJsonFromHtml(html: string): unknown[] {
 export function jsonFind(data: unknown, keyPath: string): unknown[] {
   // Split the key_path string into a list of keys
   const targetPath = keyPath.split("/");
-  
+
   // Initialize the result list
   const results: unknown[] = [];
 
@@ -320,13 +340,13 @@ export function jsonFind(data: unknown, keyPath: string): unknown[] {
       // Handle objects
       for (const [key, value] of Object.entries(obj)) {
         const currentParents = [...parents, key];
-        
+
         // Check if the end of the current path matches the target path
-        if (currentParents.length >= targetPath.length && 
-            currentParents.slice(-targetPath.length).join("/") === keyPath) {
+        if (currentParents.length >= targetPath.length &&
+          currentParents.slice(-targetPath.length).join("/") === keyPath) {
           results.push(value);
         }
-        
+
         // Recursively search the value
         search(value, currentParents);
       }
