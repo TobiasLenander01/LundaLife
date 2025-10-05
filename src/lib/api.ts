@@ -82,26 +82,8 @@ async function getStukEvents(stukOrganizationJson: StukEventData[]): Promise<Eve
             if (startDate == null)
                 continue;
 
-            // Convert UTC date to local Swedish time by treating UTC components as local
-            const convertUtcToLocal = (utcDateString: string): string => {
-                const utcDate = new Date(utcDateString);
-                const year = utcDate.getUTCFullYear();
-                const month = utcDate.getUTCMonth();
-                const day = utcDate.getUTCDate();
-                const hours = utcDate.getUTCHours();
-                const minutes = utcDate.getUTCMinutes();
-                const seconds = utcDate.getUTCSeconds();
-                
-                // Create local date with the same time components
-                const localDate = new Date(year, month, day, hours, minutes, seconds);
-                return localDate.toISOString();
-            };
-
-            const localStartDate = convertUtcToLocal(startDate);
-            const localEndDate = occurrence.end_date ? convertUtcToLocal(occurrence.end_date) : null;
-
             // Check if event has already happened
-            const eventDate = new Date(localStartDate);
+            const eventDate = new Date(startDate);
             const currentDate = new Date();
 
             // Only include future events (or events happening today)
@@ -109,7 +91,7 @@ async function getStukEvents(stukOrganizationJson: StukEventData[]): Promise<Eve
                 continue;
 
             // Create unique ID by combining event ID with start date to handle multiple occurrences
-            const uniqueId = `${eventData.id}-${localStartDate}`;
+            const uniqueId = `${eventData.id}-${startDate}`;
             
             // Create the event object
             const event: Event = {
@@ -120,8 +102,8 @@ async function getStukEvents(stukOrganizationJson: StukEventData[]): Promise<Eve
                 image: eventData.image_url || null,
                 link: occurrence.deep_link || eventData.url || null,
                 category: null, // Will be determined later
-                start_date: localStartDate,
-                end_date: localEndDate,
+                start_date: startDate,
+                end_date: startDate,
             };
 
             // Determine and assign category based on description

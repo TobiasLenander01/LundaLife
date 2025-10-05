@@ -16,8 +16,8 @@ export const Categories: Category[] = [
   { value: 'all', label: 'All Events', icon: <FiCalendar /> },
   { value: 'breakfast', label: 'Breakfast', icon: <FiCoffee />, keywords: ['frukost'] },
   { value: 'lunch', label: 'Lunch', icon: <MdRestaurant />, keywords: ['lunch', 'brunch', 'food'] },
-  { value: 'bar', label: 'Bar', icon: <BiBeer />, keywords: ['bar', 'pub'] },
-  { value: 'club', label: 'Club', icon: <FiMusic />, keywords: ['klubb', 'disco', 'dj', 'casa', 'eftersläpp', 'kajplats', 'afterparty'] },
+  { value: 'bar', label: 'Bar', icon: <BiBeer />, keywords: ['bar', 'pub', 'öl'] },
+  { value: 'club', label: 'Club', icon: <FiMusic />, keywords: ['klubb', 'disco', 'dj', 'casa', 'eftersläpp', 'kajplats', 'afterparty', 'dansgolv'] },
   { value: 'bikeparty', label: 'Bike Party', icon: <MdDirectionsBike />, keywords: ['bike', 'cykel', 'pedal']},
   { value: 'other', label: 'Other', icon: <FiMoreHorizontal /> },
 ];
