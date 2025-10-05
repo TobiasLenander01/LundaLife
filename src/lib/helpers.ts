@@ -209,7 +209,7 @@ export function determineEventCategory(event: Event): string | null {
   }
 
   const startHour = new Date(event.start_date).getHours();
-  if (startHour == 12) {
+  if (startHour === 12) {
     // If the event starts at noon, increase probability for Lunch
     const lunchCategory = categories.find(category => category.value === "lunch");
     if (lunchCategory) lunchCategory.probability++;
