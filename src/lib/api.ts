@@ -122,7 +122,7 @@ export async function getFacebookEvents(fb_id: number): Promise<Event[]> {
     const events: Event[] = [];
 
     // Define URL for facebook organization events
-    const url = `https://www.facebook.com/${fb_id}/events`;
+    const url = `https://www.facebook.com/${fb_id}/upcoming_hosted_events`;
 
     // Get html from url
     const html = await getHtml(url);

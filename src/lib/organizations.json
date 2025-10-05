@@ -117,15 +117,6 @@
         "icon": "https://api.stuk.co/media/78/image/pbl1qjg_ostgota_nation_logo_rund.png"
     },
     {
-        "id": 14,
-        "name": "LundaEkonomerna",
-        "address": "Tunavägen 37, Lund, Sweden",
-        "latitude": 55.7101196,
-        "longitude": 13.2135101,
-        "fb_id": 100064749278723,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/327427723_879337026609399_8216781755508809185_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=104&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=yiUDuT-87d0Q7kNvwFabihW&_nc_oc=AdkNU5gPh16em2Wd-pO7LgMqShXuLpumzKFoYH6Igxmz1RSyDKm13jEPxF-hALCmesw&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=nLEoFhNPfqN3Fzm5RlfiZQ&oh=00_AfcneAFuJ8ygWSHBcNyg7TqmclfB7R79EGafXii4UESnmg&oe=68E8019A"
-    },
-    {
         "id": 15,
         "name": "LundaEkonomerna - Social",
         "address": "Tunavägen 37, Lund, Sweden",
@@ -138,71 +129,17 @@
         "id": 16,
         "name": "LundaEkonomerna - Career",
         "address": "Tunavägen 37, Lund, Sweden",
-        "latitude": 55.7101196,
-        "longitude": 13.2135101,
+        "latitude": 55.71031994158043, 
+        "longitude": 13.213934007221836,
         "fb_id": 100068602892731,
         "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/306226213_413904974239596_4363878202252036874_n.png?stp=dst-png_s320x320&_nc_cat=109&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=Z8uHVvjJiG8Q7kNvwFisFou&_nc_oc=Adnakyhf1OXjOIQ6GxUvydizrrlulx7b4ndhuuqCaUKo8MHYqxBLiSGl86zj6N0A7QE&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=9m_VBIVqfbUDvkAfQ1tIgQ&oh=00_AfeLWWQhnOcL65MQh9_P5zsQTF0jYxJADJtDmR1oXsSB_w&oe=68E826FD"
-    },
-    {
-        "id": 17,
-        "name": "Lupef - Lunds universitets politiska och ekonomiska förening",
-        "address": "AF-borgen, Sandgatan 2, Lund, Sweden",
-        "latitude": 55.7052755,
-        "longitude": 13.1957801,
-        "fb_id": 100064790944029,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/323898431_5887327234661988_8887306151879985629_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=104&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=kOw0F6vsdSEQ7kNvwGJy-ZW&_nc_oc=Adnf3kLgyq6iswhNwjIxwzz0IruUnJxidFTe7Fy8qjBIdSv1uofdfFfqHEw4LiA-3-E&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=NBAQYw_kmubQgDWueXNOJQ&oh=00_AfeJn-7EIdBPEb0GEvMuLAoySLqop34ybBCZKOVV-nvcFA&oe=68E81AB3"
-    },
-    {
-        "id": 18,
-        "name": "Studentlund",
-        "address": "Sandgatan 2, Lund, Sweden",
-        "latitude": 55.7052755,
-        "longitude": 13.1957801,
-        "fb_id": 100064566888894,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/348272904_645201126938496_7419902698212301765_n.png?stp=dst-png_s320x320&_nc_cat=101&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=jZjhMn0eLqgQ7kNvwGWoj8z&_nc_oc=AdktpJeSoyr25Z2uuGaFgQUX6cv1iit5wYuf9DxdjPGKBvx2ZRUNrjPo2TvTrOQRuAI&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=UEv0QBj2mZ2js_65hvsEhQ&oh=00_AffFhlqvZngEvOgT1arXh1ZzDnozdBMxdb7Mn9VU8hGSGA&oe=68E8107A"
-    },
-    {
-        "id": 20,
-        "name": "Juridiska Föreningen i Lund",
-        "address": "Winstrupsgatan 8, Lund, Sweden",
-        "latitude": 55.705624,
-        "longitude": 13.1915695,
-        "fb_id": 100064712225012,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/327358945_1566535137199486_1216325145388693444_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=101&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=507uu7TFtugQ7kNvwHsuE5X&_nc_oc=Adnl2e7G4-9jBANrlYCjHGdQA2mc2k7LAKufuLfvFlF2jSxSrVsWn6_E5bYXqmwA8rg&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=iK8Crx9AxNWeUa1eHA_kAw&oh=00_Afdp-dyVm1ppnqLgA0RigntrIFaKE5zehdvZYR7cBs-C1g&oe=68E82A95"
-    },
-    {
-        "id": 21,
-        "name": "Teknologkåren vid LTH",
-        "address": "Carin Boalts väg 11, Lund, Sweden",
-        "latitude": 55.7124062,
-        "longitude": 13.2086873,
-        "fb_id": 100064815305387,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/327556985_1220059708866648_3882309237300288898_n.png?stp=dst-png_s320x320&_nc_cat=100&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=6dEJyNeKXXQQ7kNvwENK1D3&_nc_oc=AdmbjWLF_hTFsSP35i9XF4pyQM4YEaWBobUT3keOSaSi3avvKsRBHGgg3FzhwvdP7sc&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=4_F6OmL2QP3gyf0F5xE-zg&oh=00_AfeKsgHNoOw7ZF_gUZ8zLUSqMJzEyGmUiba1qwfRjeIpSg&oe=68E8132E"
-    },
-    {
-        "id": 22,
-        "name": "Corpus Medicum",
-        "address": "Sölvegatan 19, Lund, Sweden",
-        "latitude": 55.7113111,
-        "longitude": 13.2028703,
-        "fb_id": 100063645337357,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/274601172_360987652699410_4199001795303037174_n.png?stp=dst-png_s320x320&_nc_cat=100&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=rkfa98IYmoEQ7kNvwG-KiDI&_nc_oc=AdmV3sPp1jOxYk34be6Me48ozhEr9dskTynR0zcCk6lnlTEKcryfQRKT0fmsB1HojZ0&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=uTOEdMa9p5Hgf3nGadUFTQ&oh=00_AffmgJcR0BV7go-Zy2aqte2wS2rQViy-L8w5ExV4tYobdA&oe=68E83454"
-    },
-    {
-        "id": 23,
-        "name": "Vårdvetenskapliga Studentföreningen",
-        "address": "Sölvegatan 19, Lund, Sweden",
-        "latitude": 55.7113111,
-        "longitude": 13.2028703,
-        "fb_id": 100064739556191,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/327267911_1882539748749819_5705424835728263495_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=106&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=plHp3Z7RidAQ7kNvwGY3HhF&_nc_oc=Adn5bKy71A1KYOkKj3geXOz8OqBxasIbcfU8dn1_kGzgdc6rUFsQ4wGmPNr6WelX3G0&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=klG4feCktKrrpQik1exudw&oh=00_Afd8n4RoDloe94Vql002MawVPzOaOO0QvSNSfi8Z3WIUzQ&oe=68E80051"
     },
     {
         "id": 27,
         "name": "Studentafton",
         "address": "Sandgatan 2, Lund, Sweden",
-        "latitude": 55.7052755,
-        "longitude": 13.1957801,
+        "latitude": 55.70587368367141, 
+        "longitude": 13.193300912733852,
         "fb_id": 100064868947001,
         "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/348441296_740530597811007_5997179796706478730_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=111&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=IRk4cJt8k5wQ7kNvwHl8aiN&_nc_oc=AdmzZ9WTl8k--r89jA4Yb9tICcqSR9Q_LMDNcJtfBN2URMHk3c_gCRTHkjRK3TsyTLw&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=6fc0OmE_OSmYVq2v_XlYaA&oh=00_AfcXoedBnPQXZWvZN53674BGQiqYPfdEfwAwW6DzdIIhBg&oe=68E80020"
     },
@@ -225,15 +162,6 @@
         "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/305619047_10158337587625834_8060071471005593935_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=102&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=2uELo81syXUQ7kNvwFZm0Zd&_nc_oc=Adk2V3a_tEWKt-KqreVBKTs-lkj9S8TSzDxQsz8nm2-RHmzqx0qujmDz2C0_IF8AGsk&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=79QMofEzVG2OHyA1ILpQ1Q&oh=00_Afeh8O5xKH7LnA8aGjSztnP668YFPxWvnHc45KxpB5TNFw&oe=68E813DA"
     },
     {
-        "id": 30,
-        "name": "Societas Heraldica Lundensis",
-        "address": "Bantorget 1, Lund, Sweden",
-        "latitude": 55.7038182,
-        "longitude": 13.1892684,
-        "fb_id": 100068917908107,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/309197097_400351528938774_6501379019578474718_n.jpg?stp=c0.0.1976.1976a_dst-jpg_s320x320_tt6&_nc_cat=109&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=SIKfLv5ON8YQ7kNvwE0HpN0&_nc_oc=AdniIkEMIFGY-QpjiEH8XXswuunq_93ZSOht2Xyp9eUYIiFu8ina4kYKx6wzbbVMueQ&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=V8rGkTmebfBEFssNrpkD-g&oh=00_AffWWPt4Vu4Lq3I7lPxLsRewTG8atpssXMHRjLbLyaAywA&oe=68E8339E"
-    },
-    {
         "id": 34,
         "name": "Visit Lund",
         "address": "Bantorget 1, Lund, Sweden",
@@ -250,15 +178,6 @@
         "longitude": 13.1965755,
         "fb_id": 100064564879171,
         "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/470202055_1004538881708265_3973945232224682215_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=101&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=OfDQQ-O7qkIQ7kNvwG216V4&_nc_oc=Admno7xFsNjtoGDNUONUjIyRz_P7oWcJMfH1E4GIEWC8e0vmbKvNuttJYDPQeST48Ls&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=2Nj_HmbxKSmeZwaGvT7c5A&oh=00_AffxRiyGE_kmiCXAW6IqeT368Ob656nIWBx_nD5EjE1N2Q&oe=68E8076D"
-    },
-    {
-        "id": 36,
-        "name": "Grand Hotel i Lund",
-        "address": "Bantorget 1, Lund, Sweden",
-        "latitude": 55.7038182,
-        "longitude": 13.1892684,
-        "fb_id": 100063527142346,
-        "icon": "https://scontent.fgse1-1.fna.fbcdn.net/v/t39.30808-1/305624987_520883283372572_7028885467362503992_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=fcDOJy7LmisQ7kNvwFATRE4&_nc_oc=AdlQBxxGn7gnjnKl9in89boKH1M7w-itLzKbVfnmm4fkUBACZKHg9zA8ceUwQZDTCVg&_nc_zt=24&_nc_ht=scontent.fgse1-1.fna&_nc_gid=JvZ0cqpklI2RA9OD3aLf0w&oh=00_Aff-X2F6JY4ru7enbh985kvQATNk4knan9BoTOjZhx1TPg&oe=68E8030F"
     },
     {
         "id": 39,
