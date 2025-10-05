@@ -76,18 +76,12 @@ async function getStukEvents(stukOrganizationJson: StukEventData[]): Promise<Eve
         for (const occurrence of occurrences) {
             
             // Get occurrence dates - STUK API returns times in Swedish local time
-            let startDate = occurrence.start_date;
-            let endDate = occurrence.end_date;
+            const startDate = occurrence.start_date;
+            const endDate = occurrence.end_date;
 
             // Check if there is a startDate
             if (startDate == null)
                 continue;
-
-            // Convert Swedish local time to UTC for consistent handling
-            // STUK API returns dates in Swedish timezone, but we need UTC for consistency with Facebook events
-            startDate = fixStukTime(startDate);
-            if (endDate)
-                endDate = fixStukTime(endDate);
 
             // Check if event has already happened
             const eventDate = new Date(startDate);
@@ -259,15 +253,4 @@ async function getFacebookEvent(eventId: string | number, fb_id: number): Promis
         console.error(`Failed to parse Facebook event data for ${eventId}:`, error);
         return null;
     }
-}
-
-/**
- * Fixes STUK event times by subtracting 2 hours
- * STUK API times are consistently 2 hours ahead of the correct time
- */
-function fixStukTime(dateString: string): string {
-    const date = new Date(dateString);
-    // Subtract 2 hours (2 * 60 * 60 * 1000 milliseconds)
-    const correctedDate = new Date(date.getTime() - (2 * 60 * 60 * 1000));
-    return correctedDate.toISOString();
 }
