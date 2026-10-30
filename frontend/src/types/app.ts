@@ -1,4 +1,5 @@
 
+import { CategoryValue } from '@/lib/categories';
 import { Event, Organization } from '@/types/events';
 
 export type FilterValue = 'today' | 'this-week' | 'this-month' | 'all';
@@ -15,8 +16,12 @@ export const FilterOptions: FilterOption[] = [
   { value: 'all', label: 'All' },
 ];
 
+// Category filter: one category, or all of them
+export type CategoryFilterValue = CategoryValue | 'all';
+
 // An event together with the organization hosting it
 export interface EventItem {
   event: Event;
   organization: Organization;
+  categories: CategoryValue[];
 }

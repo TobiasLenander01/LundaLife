@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { EventItem } from '@/types/app';
+import { CategoryOptions } from '@/lib/categories';
 import { formatTimeRange, isOngoing } from '@/lib/helpers';
 import { CalendarIcon, ChevronDownIcon, ClockIcon, ExternalLinkIcon, MapPinIcon } from '@/components/icons';
 
@@ -15,9 +16,15 @@ interface EventCardProps {
 }
 
 export default function EventCard({ item, now, showOrganization, onShowOnMap, eager = false }: EventCardProps) {
-    const { event, organization } = item;
+    const { event, organization, categories } = item;
     const [expanded, setExpanded] = useState(false);
     const ongoing = isOngoing(event, now);
+
+    // e.g. "Hallands Nation · Pub, Live music"
+    const categoryLabels = CategoryOptions
+        .filter((option) => option.value !== 'other' && categories.includes(option.value))
+        .map((option) => option.label);
+    const meta = [showOrganization ? organization.name : null, categoryLabels.join(', ')].filter(Boolean);
 
     return (
         <article className="flex gap-3 rounded-2xl p-3 transition-colors hover:bg-muted">
@@ -32,8 +39,8 @@ export default function EventCard({ item, now, showOrganization, onShowOnMap, ea
             </div>
 
             <div className="min-w-0 flex-1">
-                {showOrganization && (
-                    <p className="truncate text-xs font-medium text-fg-muted">{organization.name}</p>
+                {meta.length > 0 && (
+                    <p className="truncate text-xs font-medium text-fg-muted">{meta.join(' · ')}</p>
                 )}
                 <h3 className="line-clamp-2 font-semibold leading-snug text-fg">{event.name}</h3>
 

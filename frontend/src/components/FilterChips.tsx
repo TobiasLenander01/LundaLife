@@ -1,16 +1,18 @@
-import { FilterOptions, FilterValue } from '@/types/app';
-
-interface FilterChipsProps {
-  value: FilterValue;
-  counts: Record<FilterValue, number>;
-  onChange: (value: FilterValue) => void;
+interface FilterChipsProps<T extends string> {
+  options: { value: T; label: string }[];
+  value: T;
+  counts: Record<T, number>;
+  onChange: (value: T) => void;
+  label: string;
+  // Smaller chips for the secondary (category) row
+  compact?: boolean;
 }
 
-export default function FilterChips({ value, counts, onChange }: FilterChipsProps) {
+export default function FilterChips<T extends string>({ options, value, counts, onChange, label, compact = false }: FilterChipsProps<T>) {
   return (
     // Scrolls sideways on phones, wraps in the wider side panel
-    <div role="radiogroup" aria-label="Show events" className="no-scrollbar flex gap-2 overflow-x-auto md:flex-wrap md:overflow-visible">
-      {FilterOptions.map((option) => {
+    <div role="radiogroup" aria-label={label} className="no-scrollbar flex gap-2 overflow-x-auto md:flex-wrap md:overflow-visible">
+      {options.map((option) => {
         const selected = option.value === value;
         return (
           <button
@@ -19,7 +21,9 @@ export default function FilterChips({ value, counts, onChange }: FilterChipsProp
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(option.value)}
-            className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition-colors ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-full font-medium transition-colors ${
+              compact ? 'h-8 px-3 text-[13px]' : 'h-9 px-3.5 text-sm'
+            } ${
               selected
                 ? 'bg-primary text-white shadow-sm'
                 : 'bg-raised text-fg-soft ring-1 ring-line ring-inset hover:bg-muted'
