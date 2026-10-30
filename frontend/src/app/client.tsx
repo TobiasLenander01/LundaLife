@@ -6,6 +6,7 @@ import Brand from '@/components/Brand';
 import BottomSheet, { SHEET_TOP_OFFSET, SNAP_POINTS } from '@/components/BottomSheet';
 import EventList from '@/components/EventList';
 import FilterChips from '@/components/FilterChips';
+import ThemeToggle from '@/components/ThemeToggle';
 import Map, { MapMarker } from '@/components/Map';
 import { isThisMonth, isThisWeek, isToday } from '@/lib/helpers';
 import { useMediaQuery } from '@/lib/useMediaQuery';
@@ -133,12 +134,15 @@ export default function Client({ organizations = [], loading = false, error = nu
   );
 
   return (
-    <div className="relative flex h-dvh w-full overflow-hidden bg-slate-100">
+    <div className="relative flex h-dvh w-full overflow-hidden bg-canvas">
 
       {/* Side panel (tablet and desktop) */}
-      <aside className="hidden w-[380px] shrink-0 flex-col border-r border-slate-200 bg-white md:flex lg:w-[440px]">
+      <aside className="hidden w-[380px] shrink-0 flex-col border-r border-line bg-surface md:flex lg:w-[440px]">
         <div className="space-y-4 p-4">
-          <Brand showTagline />
+          <div className="flex items-center justify-between gap-3">
+            <Brand showTagline />
+            <ThemeToggle />
+          </div>
           <FilterChips value={filter} counts={counts} onChange={setFilter} />
         </div>
         {isDesktop && eventList}
@@ -154,11 +158,12 @@ export default function Client({ organizations = [], loading = false, error = nu
 
         {/* Floating top bar (mobile) */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:hidden">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-2xl bg-white/95 p-1.5 pl-2 shadow-lg ring-1 ring-black/5 backdrop-blur">
-            <Image src="/images/logo.png" alt="LundaLife" width={32} height={32} loading="eager" className="size-8 shrink-0" />
+          <div className="pointer-events-auto flex items-center gap-2 rounded-2xl bg-raised/95 p-1.5 pl-2 shadow-lg ring-1 ring-black/5 backdrop-blur dark:ring-white/10">
+            <Image src="/images/logo.png" alt="LundaLife" width={32} height={32} loading="eager" className="size-8 shrink-0 dark:brightness-0 dark:invert" />
             <div className="min-w-0 flex-1">
               <FilterChips value={filter} counts={counts} onChange={setFilter} />
             </div>
+            <ThemeToggle />
           </div>
         </div>
       </main>

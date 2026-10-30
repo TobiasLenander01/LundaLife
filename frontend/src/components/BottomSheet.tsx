@@ -37,13 +37,13 @@ export default function BottomSheet({ title, snap, onSnapChange, children }: Bot
       <Drawer.Portal>
         <Drawer.Content
           aria-describedby={undefined}
-          className="fixed inset-x-0 bottom-0 z-20 flex h-full max-h-[calc(100%-72px-env(safe-area-inset-top))] flex-col rounded-t-3xl bg-white shadow-[0_-8px_30px_rgba(15,23,42,0.12)] outline-none md:hidden"
+          className="fixed inset-x-0 bottom-0 z-20 flex h-full max-h-[calc(100%-72px-env(safe-area-inset-top))] flex-col rounded-t-3xl bg-surface shadow-[0_-8px_30px_rgba(15,23,42,0.12)] outline-none md:hidden"
         >
           <Drawer.Title className="sr-only">{title}</Drawer.Title>
 
           {/* Drag handle */}
           <div className="flex justify-center pt-2.5 pb-3">
-            <div className="h-1.5 w-10 rounded-full bg-slate-300" />
+            <div className="h-1.5 w-10 rounded-full bg-line" />
           </div>
 
           {children}

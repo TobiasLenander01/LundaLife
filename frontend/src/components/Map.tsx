@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
+import Image from 'next/image';
+import { useEffect, useSyncExternalStore } from 'react';
+import { APIProvider, Map, AdvancedMarker, ColorScheme, useMap } from '@vis.gl/react-google-maps';
+import { useTheme } from '@/lib/theme';
 import { Organization } from '@/types/database';
 
 export interface MapMarker {
@@ -27,20 +29,33 @@ const BOUNDS = {
     west: 13.10776401441946,
 };
 
+// True once hydrated, when the real theme is known (false during server rendering and hydration)
+const subscribeNever = () => () => {};
+function useHydrated() {
+    return useSyncExternalStore(subscribeNever, () => true, () => false);
+}
+
 export default function MapComponent({ markers, selectedId, onSelect, focusOffsetY = 0 }: MapComponentProps) {
+    const theme = useTheme();
+    const hydrated = useHydrated();
 
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
     if (!apiKey || !mapId) {
         console.error('Google Maps API Key or Map ID is not defined');
         return (
-            <div className="flex h-full w-full items-center justify-center bg-slate-100 p-6 text-center text-sm text-slate-500">
+            <div className="flex h-full w-full items-center justify-center bg-muted p-6 text-center text-sm text-fg-muted">
                 The map cannot be loaded right now.
             </div>
         );
     }
 
     const selected = markers.find((marker) => marker.organization.id === selectedId)?.organization;
+
+    // Wait for the real theme, so the map isn't created in light mode and then recreated in dark mode
+    if (!hydrated) {
+        return <div className="h-full w-full bg-muted" />;
+    }
 
     return (
         <div className="h-full w-full select-none">
@@ -51,10 +66,12 @@ export default function MapComponent({ markers, selectedId, onSelect, focusOffse
                     maxZoom={19}
                     minZoom={12}
                     mapId={mapId}
+                    // Changing the color scheme recreates the map (keeping the camera position)
+                    colorScheme={theme === 'dark' ? ColorScheme.DARK : ColorScheme.LIGHT}
                     disableDefaultUI={true}
                     clickableIcons={false}
                     gestureHandling={'greedy'}
-                    backgroundColor={'#e5e7eb'}
+                    backgroundColor={theme === 'dark' ? '#1e293b' : '#e5e7eb'}
                     restriction={{
                         latLngBounds: BOUNDS,
                         strictBounds: false,
@@ -71,7 +88,7 @@ export default function MapComponent({ markers, selectedId, onSelect, focusOffse
                                 zIndex={isSelected ? 1000 : count}
                                 onClick={() => onSelect(organization)}
                             >
-                                <MarkerPin count={count} name={organization.name} selected={isSelected} />
+                                <MarkerPin organization={organization} count={count} selected={isSelected} />
                             </AdvancedMarker>
                         );
                     })}
@@ -83,21 +100,40 @@ export default function MapComponent({ markers, selectedId, onSelect, focusOffse
     );
 }
 
-function MarkerPin({ count, name, selected }: { count: number; name: string; selected: boolean }) {
-    const color = selected ? 'bg-accent text-brand' : count > 0 ? 'bg-brand text-white' : 'bg-slate-400 text-white';
-    const pointer = selected ? 'border-t-accent' : count > 0 ? 'border-t-brand' : 'border-t-slate-400';
+// The organization's logo in a round pin, with the number of events as a badge
+function MarkerPin({ organization, count, selected }: { organization: Organization; count: number; selected: boolean }) {
+    const ring = selected ? 'border-accent' : 'border-white';
+    const pointer = selected ? 'border-t-accent' : 'border-t-white';
 
     return (
         <div className={`relative flex origin-bottom flex-col items-center transition-transform duration-200 ${selected ? 'scale-125' : 'hover:scale-110'}`}>
-            <div className={`flex h-8 min-w-8 items-center justify-center rounded-full border-2 border-white px-1.5 text-sm font-semibold shadow-md ${color}`}>
-                {count > 0 ? count : <span className="size-2 rounded-full bg-white" />}
+            <div className={`relative size-11 rounded-full border-[3px] bg-white shadow-lg ${ring}`}>
+                {organization.logo ? (
+                    <Image
+                        src={organization.logo}
+                        alt=""
+                        width={44}
+                        height={44}
+                        className={`size-full rounded-full object-cover ${count === 0 && !selected ? 'opacity-60 grayscale' : ''}`}
+                    />
+                ) : (
+                    <span className="flex size-full items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
+                        {organization.name.charAt(0)}
+                    </span>
+                )}
+
+                {count > 0 && (
+                    <span className="absolute -top-1.5 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-primary px-1 text-[11px] font-semibold text-white tabular-nums">
+                        {count}
+                    </span>
+                )}
             </div>
-            <div className={`-mt-px h-0 w-0 border-x-[6px] border-t-[7px] border-x-transparent ${pointer}`} />
+            <div className={`-mt-px h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent ${pointer}`} />
 
             {/* Name label, positioned so it doesn't move the marker's anchor point */}
             {selected && (
-                <span className="absolute top-full mt-1 whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-brand shadow-md">
-                    {name}
+                <span className="absolute top-full mt-1 whitespace-nowrap rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold text-fg shadow-md">
+                    {organization.name}
                 </span>
             )}
         </div>

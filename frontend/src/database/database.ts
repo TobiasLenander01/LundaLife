@@ -8,6 +8,7 @@
 import db from '@/database/pool';
 import { Organization, Event } from '@/types/database';
 import { ScrapedEvent } from '@/types/scraper';
+import { LOGOS } from '@/data/logos';
 
 export async function getOrganizations(): Promise<Organization[]> {
   
@@ -66,6 +67,7 @@ export async function getOrganizations(): Promise<Organization[]> {
       stuk_id: row.stuk_id,
       fb_id: row.fb_id,
       icon: row.icon,
+      logo: LOGOS[row.id] ?? null,
       events: row.events as Event[] // Cast the events field to Event[]
     }));
   } catch (error) {

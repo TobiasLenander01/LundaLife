@@ -12,6 +12,8 @@ export type Organization = {
   stuk_id: number | null;
   fb_id: number | null;
   icon: string | null;
+  // Path to the logo shown on the map marker (from src/data/logos.ts)
+  logo: string | null;
   events?: Event[];
 };
 

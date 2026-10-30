@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { THEME_SCRIPT } from "@/lib/themeScript";
 import "./globals.css";
 
 const geist = Geist({
@@ -13,7 +14,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c253e",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0c253e" },
+    { media: "(prefers-color-scheme: dark)", color: "#020617" },
+  ],
   // Draw behind the iPhone notch and home indicator; safe areas are handled with env(safe-area-inset-*)
   viewportFit: "cover",
 };
@@ -24,7 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={geist.variable}>
+    // The theme script adds the "dark" class before React loads, so hydration warnings are expected here
+    <html lang="en" className={geist.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="font-sans">
         {children}
       </body>
