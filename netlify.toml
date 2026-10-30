@@ -1,0 +1,6 @@
+# The Next.js app lives in frontend/, so build from there
+# (these settings override the ones in the Netlify UI)
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = ".next"
