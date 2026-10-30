@@ -1,15 +1,11 @@
-import { connection } from 'next/server';
-import { getOrganizations } from '@/database/database';
+'use client';
+
+import { useStukOrganizations } from '@/lib/stuk';
 import Client from './client';
 
-export default async function Server() {
-  // Render on every request so newly scraped events show up
-  // (otherwise the page is prerendered once at build time)
-  await connection();
+export default function Page() {
+  // Load the organizations and their events from Stuk in the browser
+  const { organizations, loading, error, retry } = useStukOrganizations();
 
-  // Fetch organizations from the database
-  const organizations = await getOrganizations();
-
-  // Pass the organizations to the Map component
-  return <Client organizations={organizations} />;
+  return <Client organizations={organizations} loading={loading} error={error} onRetry={retry} />;
 }

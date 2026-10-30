@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useMemo, useRef, useState } from 'react';
 import Brand from '@/components/Brand';
-import BottomSheet, { SNAP_POINTS } from '@/components/BottomSheet';
+import BottomSheet, { SHEET_TOP_OFFSET, SNAP_POINTS } from '@/components/BottomSheet';
 import EventList from '@/components/EventList';
 import FilterChips from '@/components/FilterChips';
 import Map, { MapMarker } from '@/components/Map';
@@ -11,7 +11,7 @@ import { isThisMonth, isThisWeek, isToday } from '@/lib/helpers';
 import { useMediaQuery } from '@/lib/useMediaQuery';
 import { useNow } from '@/lib/useNow';
 import { EventItem, FilterOptions, FilterValue } from '@/types/app';
-import { Event, Organization } from '@/types/database';
+import { Event, Organization } from '@/types/events';
 
 interface ClientProps {
   organizations?: Organization[];
@@ -100,11 +100,14 @@ export default function Client({ organizations = [], loading = false, error = nu
     onClick: () => setFilter(nextFilter.value),
   };
 
-  // Keep the selected marker visible above the bottom sheet on mobile
-  const sheetCollapsed = snap === SNAP_POINTS[0];
-  const focusOffsetY = isDesktop || typeof window === 'undefined'
-    ? 0
-    : sheetCollapsed ? 40 : window.innerHeight * 0.275 - 36;
+  // Keep the selected marker centered in the part of the map between the top bar and the bottom sheet
+  let focusOffsetY = 0;
+  if (!isDesktop && typeof window !== 'undefined') {
+    const height = window.innerHeight;
+    const snapHeight = typeof snap === 'string' ? parseFloat(snap) : (snap ?? 1) * height;
+    const sheetTop = SHEET_TOP_OFFSET + height - snapHeight;
+    focusOffsetY = height / 2 - (SHEET_TOP_OFFSET + sheetTop) / 2;
+  }
 
   const eventList = (
     <EventList

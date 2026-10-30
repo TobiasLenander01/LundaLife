@@ -1,5 +1,5 @@
 
-import { Event, Organization } from '@/types/database';
+import { Event, Organization } from '@/types/events';
 
 export type FilterValue = 'today' | 'this-week' | 'this-month' | 'all';
 

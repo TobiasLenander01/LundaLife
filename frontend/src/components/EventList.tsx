@@ -3,7 +3,7 @@ import EventCard from '@/components/EventCard';
 import { CalendarIcon, CloseIcon } from '@/components/icons';
 import { formatDayHeading, getListDay } from '@/lib/helpers';
 import { EventItem } from '@/types/app';
-import { Organization } from '@/types/database';
+import { Organization } from '@/types/events';
 
 interface EventListProps {
     title: string;

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
-import { Organization } from '@/types/database';
+import { Organization } from '@/types/events';
 
 export interface MapMarker {
     organization: Organization;

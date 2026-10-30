@@ -1,4 +1,4 @@
-import type { Event } from '@/types/database';
+import type { Event } from '@/types/events';
 
 // All events take place in Lund, so "today", "this week" etc. are always
 // evaluated in Swedish time, regardless of the server's or browser's time zone.

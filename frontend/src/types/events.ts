@@ -1,6 +1,6 @@
 
 /**
- * Defines TypeScript types representing database entities used in the application.
+ * Defines TypeScript types for the organizations and their events.
  */
 
 export type Organization = {
@@ -9,9 +9,7 @@ export type Organization = {
   address: string;
   latitude: number;
   longitude: number;
-  stuk_id: number | null;
-  fb_id: number | null;
-  icon: string | null;
+  stuk_id: number;
   events?: Event[];
 };
 
@@ -21,10 +19,9 @@ export type Event = {
   name: string;
   description: string | null;
   address: string | null;
-  latitude: number | null;
-  longitude: number | null;
   image: string | null;
   link: string | null;
+  // ISO date strings
   start_date: string;
   end_date: string | null;
 };
