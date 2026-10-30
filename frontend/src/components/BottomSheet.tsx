@@ -3,8 +3,15 @@
 import { ReactNode } from 'react';
 import { Drawer } from 'vaul';
 
-// Collapsed (header only), half screen, and fully expanded
-export const SNAP_POINTS: (number | string)[] = ['148px', 0.55, 1];
+// Space kept free above the sheet for the top bar (excluding the safe area inset)
+export const SHEET_TOP_OFFSET = 72;
+
+/**
+ * Collapsed (header only), about half the screen, and fully expanded.
+ * vaul measures snap points from the top of the window, but the sheet starts SHEET_TOP_OFFSET lower,
+ * so each snap point shows SHEET_TOP_OFFSET less than its value (e.g. '240px' shows 168px).
+ */
+export const SNAP_POINTS: (number | string)[] = ['240px', 0.6, 1];
 
 interface BottomSheetProps {
   title: string;
@@ -30,7 +37,7 @@ export default function BottomSheet({ title, snap, onSnapChange, children }: Bot
       <Drawer.Portal>
         <Drawer.Content
           aria-describedby={undefined}
-          className="fixed inset-x-0 bottom-0 z-20 flex h-full max-h-[calc(100%-4.5rem-env(safe-area-inset-top))] flex-col rounded-t-3xl bg-white shadow-[0_-8px_30px_rgba(15,23,42,0.12)] outline-none md:hidden"
+          className="fixed inset-x-0 bottom-0 z-20 flex h-full max-h-[calc(100%-72px-env(safe-area-inset-top))] flex-col rounded-t-3xl bg-white shadow-[0_-8px_30px_rgba(15,23,42,0.12)] outline-none md:hidden"
         >
           <Drawer.Title className="sr-only">{title}</Drawer.Title>
 
