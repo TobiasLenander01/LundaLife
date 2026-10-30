@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FilterOption, FilterOptions } from '@/types/app';
 import Image from 'next/image';
 
@@ -11,6 +11,21 @@ export default function Header({selectedFilter, handleFilterChange }: HeaderComp
   // State to manage dropdown visibility
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close the dropdown when clicking outside of it
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+
+    const handleClickOutside = (event: PointerEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    // Use the capture phase, since the map stops pointer events from bubbling
+    document.addEventListener('pointerdown', handleClickOutside, true);
+    return () => document.removeEventListener('pointerdown', handleClickOutside, true);
+  }, [isDropdownOpen]);
 
   // Function to handle filter selection
   const handleSelectFilter = (option: FilterOption) => {
@@ -25,7 +40,7 @@ export default function Header({selectedFilter, handleFilterChange }: HeaderComp
         
         {/* Logo and name */}
         <div className="flex items-center space-x-3">
-          <Image src="/images/logo.png" alt="LundaLife Logo" width={48} height={48}/> 
+          <Image src="/images/logo.png" alt="LundaLife Logo" width={48} height={48} loading="eager" /> 
           <span className="text-xl font-semibold text-gray-800">LundaLife</span>
         </div>
 
@@ -78,4 +93,4 @@ export default function Header({selectedFilter, handleFilterChange }: HeaderComp
       </div>
     </header>
   );
-};
+}

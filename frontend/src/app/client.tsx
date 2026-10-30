@@ -5,7 +5,7 @@ import Map from '@/components/Map';
 import Drawer from '@/components/Drawer';
 import EventCard from '@/components/EventCard';
 import { isToday, isThisWeek, isThisMonth } from '@/lib/helpers';
-import { Organization } from '@/types/database';
+import { Event, Organization } from '@/types/database';
 import { CustomMarker, FilterOption, FilterOptions } from '@/types/app';
 import { useState, useMemo } from 'react';
 
@@ -21,11 +21,11 @@ export default function Client({ organizations = [] }: ClientProps) {
   // Memoize the filtered list of organizations.
   const filteredOrganizations = useMemo(() => {
     // Helper to check if an org has an event matching a date condition.
-    const hasMatchingEvent = (org: Organization, dateCheckFn: (dateStr: string) => boolean) => {
+    const hasMatchingEvent = (org: Organization, dateCheckFn: (event: Event) => boolean) => {
       if (!org.events || org.events.length === 0) {
         return false;
       }
-      return org.events.some(event => dateCheckFn(event.start_date));
+      return org.events.some(event => dateCheckFn(event));
     };
 
     switch (selectedFilter.value) {
@@ -51,7 +51,7 @@ export default function Client({ organizations = [] }: ClientProps) {
     }[selectedFilter.value];
 
     if (dateCheckFn) {
-      return selectedOrganization.events.filter(event => dateCheckFn(event.start_date));
+      return selectedOrganization.events.filter(event => dateCheckFn(event));
     }
 
     // if no filter matches, show all events for the selected org
@@ -69,7 +69,6 @@ export default function Client({ organizations = [] }: ClientProps) {
     lat: org.latitude,
     lng: org.longitude,
     title: org.name ?? 'Unnamed Organization',
-    icon: org.icon ?? undefined,
     onClick: () => setSelectedOrganization(org),
   }));
 

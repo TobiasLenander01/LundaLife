@@ -49,10 +49,11 @@ export default function MapComponent({
                         strictBounds: false,
                     }}
                 >
-                    {markers.map((marker, index) => (
+                    {markers.map((marker) => (
                         <AdvancedMarker
-                            key={index}
+                            key={marker.id}
                             position={{ lat: marker.lat, lng: marker.lng }}
+                            title={marker.title}
                             onClick={marker.onClick}
                         >
                             <Pin
@@ -67,4 +68,4 @@ export default function MapComponent({
             </APIProvider>
         </div>
     );
-};
+}

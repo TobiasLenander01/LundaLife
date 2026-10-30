@@ -7,6 +7,7 @@
 
 import db from '@/database/pool';
 import { Organization, Event } from '@/types/database';
+import { ScrapedEvent } from '@/types/scraper';
 
 export async function getOrganizations(): Promise<Organization[]> {
   
@@ -42,7 +43,9 @@ export async function getOrganizations(): Promise<Organization[]> {
     FROM
       organizations
     LEFT JOIN
-      events ON organizations.id = events.organization_id AND events.start_date > NOW()
+      events ON organizations.id = events.organization_id
+      -- Include events that are still ongoing (GREATEST ignores a NULL end_date)
+      AND GREATEST(events.start_date, events.end_date) > NOW()
     GROUP BY
       organizations.id
     ORDER BY
@@ -79,7 +82,7 @@ export async function getEvents(): Promise<Event[]> {
     FROM
       events
     WHERE
-      events.start_date > NOW()
+      GREATEST(events.start_date, events.end_date) > NOW()
     ORDER BY
       events.start_date ASC;
   `;
@@ -104,5 +107,46 @@ export async function getEvents(): Promise<Event[]> {
   } catch (error) {
     console.error("Error fetching events:", error);
     throw error;
+  }
+}
+
+export async function upsertEvent(event: ScrapedEvent): Promise<number | null> {
+  // Insert the event, or update it if the organization already has an event at the same time
+  const query = `
+    INSERT INTO events (
+      organization_id, name, description, address, latitude, longitude, image, start_date, end_date, link
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    ON CONFLICT (organization_id, start_date) DO UPDATE SET
+      name = EXCLUDED.name,
+      description = EXCLUDED.description,
+      address = EXCLUDED.address,
+      latitude = EXCLUDED.latitude,
+      longitude = EXCLUDED.longitude,
+      image = EXCLUDED.image,
+      end_date = EXCLUDED.end_date,
+      link = EXCLUDED.link
+    RETURNING id;
+  `;
+
+  try {
+    const res = await db.query(query, [
+      event.organization_id,
+      event.name,
+      event.description,
+      event.address,
+      event.latitude,
+      event.longitude,
+      event.image,
+      event.start_date,
+      event.end_date,
+      event.link
+    ]);
+
+    // Return the id of the inserted or updated event
+    return res.rows[0].id;
+  } catch (error) {
+    console.error(`Error saving event '${event.name}':`, error);
+    return null;
   }
 }
