@@ -51,13 +51,61 @@ export function isThisMonth(event: Event, now: Date = new Date()): boolean {
     return overlapsDays(event, `${month}-01`, `${month}-31`);
 }
 
-// Formats an event date with time in Swedish time, e.g. "6 Nov 2026, 20:00"
-const dateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
-    timeZone: TIME_ZONE,
-    dateStyle: 'medium',
-    timeStyle: 'short',
+// Checks if an event is happening right now
+export function isOngoing(event: Event, now: Date = new Date()): boolean {
+    const start = new Date(event.start_date);
+    const end = new Date(event.end_date ?? event.start_date);
+    return start <= now && end >= now;
+}
+
+// Returns the day an event is listed under: its start day, or today if it has already started
+export function getListDay(event: Event, now: Date = new Date()): string {
+    const startDay = toDayKey(new Date(event.start_date));
+    const today = toDayKey(now);
+    return startDay < today ? today : startDay;
+}
+
+// Formats a "YYYY-MM-DD" key as "Today", "Tomorrow" or e.g. "Thursday 5 November"
+const dayHeadingFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'UTC',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
 });
 
-export function formatDateTime(dateStr: string): string {
-    return dateTimeFormatter.format(new Date(dateStr));
+export function formatDayHeading(dayKey: string, now: Date = new Date()): string {
+    const today = toDayKey(now);
+    if (dayKey === today) return 'Today';
+    if (dayKey === addDays(today, 1)) return 'Tomorrow';
+
+    const [year, month, day] = dayKey.split('-').map(Number);
+    return dayHeadingFormatter.format(new Date(Date.UTC(year, month - 1, day, 12)));
+}
+
+// Formats times in Swedish time, e.g. "20:00" and "6 Nov 20:00"
+const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: TIME_ZONE,
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+});
+
+// Formats an event's time span, e.g. "20:00 – 01:00", or with dates if it lasts more than a day
+export function formatTimeRange(event: Event): string {
+    const start = new Date(event.start_date);
+    if (!event.end_date) {
+        return timeFormatter.format(start);
+    }
+
+    const end = new Date(event.end_date);
+    const lastsOverADay = end.getTime() - start.getTime() >= 24 * 60 * 60 * 1000;
+    const format = lastsOverADay ? dateTimeFormatter : timeFormatter;
+    return `${format.format(start)} – ${format.format(end)}`;
 }

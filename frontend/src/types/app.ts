@@ -1,23 +1,22 @@
 
-import { ReactNode } from "react";
+import { Event, Organization } from '@/types/database';
 
-export interface CustomMarker {
-    id: string | number;
-    lat: number;
-    lng: number;
-    title?: string;
-    glyph?: ReactNode;
-    onClick?: () => void;
-}
+export type FilterValue = 'today' | 'this-week' | 'this-month' | 'all';
 
 export interface FilterOption {
-  value: string;
+  value: FilterValue;
   label: string;
 }
 
 export const FilterOptions: FilterOption[] = [
-  { value: 'today', label: 'Events today' },
-  { value: 'this-week', label: 'Events this week' },
-  { value: 'this-month', label: 'Events this month' },
-  { value: 'all', label: 'All organizations' },
+  { value: 'today', label: 'Today' },
+  { value: 'this-week', label: 'This week' },
+  { value: 'this-month', label: 'This month' },
+  { value: 'all', label: 'All' },
 ];
+
+// An event together with the organization hosting it
+export interface EventItem {
+  event: Event;
+  organization: Organization;
+}
