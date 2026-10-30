@@ -8,10 +8,11 @@ import EventList from '@/components/EventList';
 import FilterChips from '@/components/FilterChips';
 import ThemeToggle from '@/components/ThemeToggle';
 import Map, { MapMarker } from '@/components/Map';
+import { CategoryOptions, CategoryValue, getCategories } from '@/lib/categories';
 import { isThisMonth, isThisWeek, isToday } from '@/lib/helpers';
 import { useMediaQuery } from '@/lib/useMediaQuery';
 import { useNow } from '@/lib/useNow';
-import { EventItem, FilterOptions, FilterValue } from '@/types/app';
+import { CategoryFilterValue, EventItem, FilterOptions, FilterValue } from '@/types/app';
 import { Event, Organization } from '@/types/database';
 
 interface ClientProps {
@@ -36,12 +37,18 @@ const FILTER_TITLES: Record<FilterValue, string> = {
   'all': 'All upcoming events',
 };
 
+const CATEGORY_FILTER_OPTIONS: { value: CategoryFilterValue; label: string }[] = [
+  { value: 'all', label: 'All' },
+  ...CategoryOptions,
+];
+
 function plural(count: number, word: string) {
   return `${count} ${word}${count === 1 ? '' : 's'}`;
 }
 
 export default function Client({ organizations = [], loading = false, error = null, onRetry }: ClientProps) {
   const [filter, setFilter] = useState<FilterValue>('today');
+  const [category, setCategory] = useState<CategoryFilterValue>('all');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [snap, setSnap] = useState<number | string | null>(SNAP_POINTS[1]);
   const listRef = useRef<HTMLDivElement>(null);
@@ -56,19 +63,45 @@ export default function Client({ organizations = [], loading = false, error = nu
     'all': () => true,
   }), [now]);
 
-  // Number of events for each filter, shown on the filter chips
-  const counts = useMemo(() => {
-    const allEvents = organizations.flatMap((org) => org.events ?? []);
-    return Object.fromEntries(
-      FilterOptions.map((option) => [option.value, allEvents.filter(checks[option.value]).length])
-    ) as Record<FilterValue, number>;
-  }, [organizations, checks]);
+  // Categories of each event, worked out once when the events load
+  const categoriesOf = useMemo(() => {
+    const categories = new WeakMap<Event, CategoryValue[]>();
+    organizations.forEach((org) => org.events?.forEach((event) => categories.set(event, getCategories(event))));
+    return (event: Event) => categories.get(event) ?? ['other'];
+  }, [organizations]);
 
-  // Each organization with its events in the selected filter
+  const inCategory = useMemo(
+    () => (event: Event) => category === 'all' || categoriesOf(event).includes(category),
+    [category, categoriesOf],
+  );
+
+  // Number of events for each time filter (in the selected category) and each category (in the selected time)
+  const { counts, categoryCounts } = useMemo(() => {
+    const allEvents = organizations.flatMap((org) => org.events ?? []);
+    const inTime = allEvents.filter(checks[filter]);
+    return {
+      counts: Object.fromEntries(
+        FilterOptions.map((option) => [option.value, allEvents.filter((e) => checks[option.value](e) && inCategory(e)).length])
+      ) as Record<FilterValue, number>,
+      categoryCounts: Object.fromEntries(
+        CATEGORY_FILTER_OPTIONS.map(({ value }) => [
+          value,
+          value === 'all' ? inTime.length : inTime.filter((e) => categoriesOf(e).includes(value)).length,
+        ])
+      ) as Record<CategoryFilterValue, number>,
+    };
+  }, [organizations, checks, filter, inCategory, categoriesOf]);
+
+  // Only show categories that have events (and the selected one)
+  const categoryOptions = CATEGORY_FILTER_OPTIONS.filter(
+    (option) => option.value === 'all' || option.value === category || categoryCounts[option.value] > 0
+  );
+
+  // Each organization with its events in the selected time and category
   const filtered = useMemo(() => organizations.map((organization) => ({
     organization,
-    events: (organization.events ?? []).filter(checks[filter]),
-  })), [organizations, checks, filter]);
+    events: (organization.events ?? []).filter((event) => checks[filter](event) && inCategory(event)),
+  })), [organizations, checks, filter, inCategory]);
 
   const selected = organizations.find((org) => org.id === selectedId) ?? null;
 
@@ -80,7 +113,7 @@ export default function Client({ organizations = [], loading = false, error = nu
   // Events to list, sorted by start time
   const items: EventItem[] = filtered
     .filter(({ organization }) => !selected || organization.id === selected.id)
-    .flatMap(({ organization, events }) => events.map((event) => ({ event, organization })))
+    .flatMap(({ organization, events }) => events.map((event) => ({ event, organization, categories: categoriesOf(event) })))
     .sort((a, b) => new Date(a.event.start_date).getTime() - new Date(b.event.start_date).getTime());
 
   const placeCount = new Set(items.map((item) => item.organization.id)).size;
@@ -94,12 +127,18 @@ export default function Client({ organizations = [], loading = false, error = nu
     }
   };
 
-  // Suggest a wider time period when there are no events
+  // Suggest a wider time period when there are no events, or else all categories
   const nextFilter = FilterOptions[FilterOptions.findIndex((option) => option.value === filter) + 1];
-  const emptyAction = nextFilter && {
-    label: `Show ${nextFilter.label.toLowerCase()}`,
-    onClick: () => setFilter(nextFilter.value),
-  };
+  const emptyAction = nextFilter
+    ? { label: `Show ${nextFilter.label.toLowerCase()}`, onClick: () => setFilter(nextFilter.value) }
+    : category !== 'all'
+      ? { label: 'Show all categories', onClick: () => setCategory('all') }
+      : undefined;
+
+  // e.g. "Lunch · Today", and "No lunch events today."
+  const categoryLabel = CATEGORY_FILTER_OPTIONS.find((option) => option.value === category)!.label;
+  const title = category === 'all' ? FILTER_TITLES[filter] : `${categoryLabel} · ${FILTER_TITLES[filter]}`;
+  const eventsWord = category === 'all' ? 'events' : `${categoryLabel.toLowerCase()} events`;
 
   // Keep the selected marker centered in the part of the map between the top bar and the bottom sheet
   let focusOffsetY = 0;
@@ -112,7 +151,7 @@ export default function Client({ organizations = [], loading = false, error = nu
 
   const eventList = (
     <EventList
-      title={selected ? selected.name : FILTER_TITLES[filter]}
+      title={selected ? selected.name : title}
       subtitle={selected
         ? `${plural(items.length, 'event')} ${FILTER_PHRASES[filter]}`
         : `${plural(items.length, 'event')} at ${plural(placeCount, 'place')}`}
@@ -125,8 +164,8 @@ export default function Client({ organizations = [], loading = false, error = nu
       // On mobile, collapse the sheet so the map is visible
       onShowOnMap={(organization) => selectOrganization(organization, SNAP_POINTS[0])}
       emptyMessage={selected
-        ? `${selected.name} has no events ${FILTER_PHRASES[filter]}.`
-        : `No events ${FILTER_PHRASES[filter]}.`}
+        ? `${selected.name} has no ${eventsWord} ${FILTER_PHRASES[filter]}.`
+        : `No ${eventsWord} ${FILTER_PHRASES[filter]}.`}
       emptyAction={emptyAction}
       scrollable={isDesktop || snap === SNAP_POINTS[SNAP_POINTS.length - 1]}
       scrollRef={listRef}
@@ -143,7 +182,8 @@ export default function Client({ organizations = [], loading = false, error = nu
             <Brand showTagline />
             <ThemeToggle />
           </div>
-          <FilterChips value={filter} counts={counts} onChange={setFilter} />
+          <FilterChips options={FilterOptions} value={filter} counts={counts} onChange={setFilter} label="Time" />
+          <FilterChips options={categoryOptions} value={category} counts={categoryCounts} onChange={setCategory} label="Category" compact />
         </div>
         {isDesktop && eventList}
       </aside>
@@ -158,19 +198,22 @@ export default function Client({ organizations = [], loading = false, error = nu
 
         {/* Floating top bar (mobile) */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:hidden">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-2xl bg-raised/95 p-1.5 pl-2 shadow-lg ring-1 ring-black/5 backdrop-blur dark:ring-white/10">
-            <Image src="/images/logo.png" alt="LundaLife" width={32} height={32} loading="eager" className="size-8 shrink-0 dark:brightness-0 dark:invert" />
-            <div className="min-w-0 flex-1">
-              <FilterChips value={filter} counts={counts} onChange={setFilter} />
+          <div className="pointer-events-auto space-y-1.5 rounded-2xl bg-raised/95 p-1.5 shadow-lg ring-1 ring-black/5 backdrop-blur dark:ring-white/10">
+            <div className="flex items-center gap-2 pl-0.5">
+              <Image src="/images/logo.png" alt="LundaLife" width={32} height={32} loading="eager" className="size-8 shrink-0 dark:brightness-0 dark:invert" />
+              <div className="min-w-0 flex-1">
+                <FilterChips options={FilterOptions} value={filter} counts={counts} onChange={setFilter} label="Time" />
+              </div>
+              <ThemeToggle />
             </div>
-            <ThemeToggle />
+            <FilterChips options={categoryOptions} value={category} counts={categoryCounts} onChange={setCategory} label="Category" compact />
           </div>
         </div>
       </main>
 
       {/* Bottom sheet (mobile) */}
       {!isDesktop && (
-        <BottomSheet title={selected ? selected.name : FILTER_TITLES[filter]} snap={snap} onSnapChange={setSnap}>
+        <BottomSheet title={selected ? selected.name : title} snap={snap} onSnapChange={setSnap}>
           {eventList}
         </BottomSheet>
       )}
