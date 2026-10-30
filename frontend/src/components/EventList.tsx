@@ -52,15 +52,15 @@ export default function EventList({
             {/* Header */}
             <header className="flex items-start justify-between gap-3 px-4 pb-3">
                 <div className="min-w-0">
-                    <h2 className="truncate text-lg font-semibold tracking-tight text-slate-900">{title}</h2>
-                    <p className="text-sm text-slate-500">{loading ? 'Loading events…' : subtitle}</p>
+                    <h2 className="truncate text-lg font-semibold tracking-tight text-fg">{title}</h2>
+                    <p className="text-sm text-fg-muted">{loading ? 'Loading events…' : subtitle}</p>
                 </div>
                 {onClearSelection && (
                     <button
                         type="button"
                         onClick={onClearSelection}
                         aria-label="Show all organizations"
-                        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200"
+                        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-fg-soft transition-colors hover:bg-line"
                     >
                         <CloseIcon className="size-4" />
                     </button>
@@ -79,17 +79,18 @@ export default function EventList({
                 ) : items.length === 0 ? (
                     <EmptyState message={emptyMessage} action={emptyAction} />
                 ) : (
-                    [...groups].map(([day, dayItems]) => (
+                    [...groups].map(([day, dayItems], groupIndex) => (
                         <section key={day} aria-label={formatDayHeading(day, now)}>
-                            <h3 className="sticky top-0 z-10 bg-white/95 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 backdrop-blur">
+                            <h3 className="sticky top-0 z-10 bg-surface/95 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-fg-muted backdrop-blur">
                                 {formatDayHeading(day, now)}
                             </h3>
-                            {dayItems.map((item) => (
+                            {dayItems.map((item, index) => (
                                 <EventCard
                                     key={`${item.organization.id}-${item.event.id}`}
                                     item={item}
                                     now={now}
                                     showOrganization={!onClearSelection}
+                                    eager={groupIndex === 0 && index < 3}
                                     onShowOnMap={() => onShowOnMap(item.organization)}
                                 />
                             ))}
@@ -104,15 +105,15 @@ export default function EventList({
 function EmptyState({ message, action }: { message: string; action?: { label: string; onClick: () => void } }) {
     return (
         <div className="flex flex-col items-center px-6 py-10 text-center">
-            <div className="flex size-12 items-center justify-center rounded-full bg-slate-100">
-                <CalendarIcon className="size-6 text-slate-400" />
+            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+                <CalendarIcon className="size-6 text-fg-muted" />
             </div>
-            <p className="mt-3 text-sm text-slate-600">{message}</p>
+            <p className="mt-3 text-sm text-fg-soft">{message}</p>
             {action && (
                 <button
                     type="button"
                     onClick={action.onClick}
-                    className="mt-4 h-9 rounded-full bg-brand px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+                    className="mt-4 h-9 rounded-full bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
                 >
                     {action.label}
                 </button>
@@ -124,14 +125,14 @@ function EmptyState({ message, action }: { message: string; action?: { label: st
 function ListSkeleton() {
     return (
         <div aria-hidden="true" className="animate-pulse">
-            <div className="mx-3 my-3 h-3 w-20 rounded bg-slate-200" />
+            <div className="mx-3 my-3 h-3 w-20 rounded bg-line" />
             {Array.from({ length: 5 }, (_, i) => (
                 <div key={i} className="flex gap-3 p-3">
-                    <div className="size-16 shrink-0 rounded-xl bg-slate-200 sm:size-20" />
+                    <div className="size-16 shrink-0 rounded-xl bg-line sm:size-20" />
                     <div className="flex-1 space-y-2 py-1">
-                        <div className="h-3 w-24 rounded bg-slate-200" />
-                        <div className="h-4 w-4/5 rounded bg-slate-200" />
-                        <div className="h-3 w-28 rounded bg-slate-200" />
+                        <div className="h-3 w-24 rounded bg-line" />
+                        <div className="h-4 w-4/5 rounded bg-line" />
+                        <div className="h-3 w-28 rounded bg-line" />
                     </div>
                 </div>
             ))}

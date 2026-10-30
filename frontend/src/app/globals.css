@@ -1,16 +1,54 @@
 @import "tailwindcss";
 
+/* Dark mode is toggled with the "dark" class on <html> (see lib/theme.ts) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 
   /* Navy from the logo, and a warm accent for selections */
   --color-brand: #0c253e;
-  --color-brand-hover: #173a5e;
   --color-accent: #e8a33d;
+
+  /* Theme colors, which change in dark mode */
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --color-fg-muted: var(--fg-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
 }
 
 :root {
   color-scheme: light;
+  --canvas: #f1f5f9;      /* app background */
+  --surface: #ffffff;     /* panels, sheet */
+  --raised: #ffffff;      /* floating bar, chips */
+  --muted: #f1f5f9;       /* hover, placeholders */
+  --line: #e2e8f0;        /* borders */
+  --fg: #0f172a;          /* headings */
+  --fg-soft: #334155;     /* body text */
+  --fg-muted: #64748b;    /* secondary text */
+  --primary: #0c253e;     /* buttons, selected chip */
+  --primary-hover: #173a5e;
+}
+
+.dark {
+  color-scheme: dark;
+  --canvas: #020617;
+  --surface: #0f172a;
+  --raised: #1e293b;
+  --muted: #1e293b;
+  --line: #334155;
+  --fg: #f1f5f9;
+  --fg-soft: #cbd5e1;
+  --fg-muted: #94a3b8;
+  --primary: #2f6aa3;
+  --primary-hover: #3b7bb8;
 }
 
 html,
@@ -20,8 +58,8 @@ body {
 
 body {
   margin: 0;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--canvas);
+  color: var(--fg);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;

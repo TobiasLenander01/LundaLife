@@ -10,6 +10,8 @@ export type Organization = {
   latitude: number;
   longitude: number;
   stuk_id: number;
+  // Path to the logo shown on the map marker
+  logo: string | null;
   events?: Event[];
 };
 

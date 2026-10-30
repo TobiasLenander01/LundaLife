@@ -21,12 +21,12 @@ export default function FilterChips({ value, counts, onChange }: FilterChipsProp
             onClick={() => onChange(option.value)}
             className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition-colors ${
               selected
-                ? 'bg-brand text-white shadow-sm'
-                : 'bg-white text-slate-700 ring-1 ring-slate-200 ring-inset hover:bg-slate-50'
+                ? 'bg-primary text-white shadow-sm'
+                : 'bg-raised text-fg-soft ring-1 ring-line ring-inset hover:bg-muted'
             }`}
           >
             {option.label}
-            <span className={`text-xs tabular-nums ${selected ? 'text-white/70' : 'text-slate-400'}`}>
+            <span className={`text-xs tabular-nums ${selected ? 'text-white/70' : 'text-fg-muted'}`}>
               {counts[option.value]}
             </span>
           </button>
